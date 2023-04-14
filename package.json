@@ -1,0 +1,17 @@
+{
+  "name": "wireguard-server-endpoint",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "scripts": {
+    "start": "nodejs ./dist/index.js",
+    "build": "npx tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "typescript": "^5.0.4"
+  }
+}
