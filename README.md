@@ -6,8 +6,9 @@
 - typescript
   - `npm install typescript`
 
-## In order to run the project
-
+## Run the project
+In order to run the project you must run it from a terminal with sudo permissions
+- `sudo -i`
 - `yarn run build`
 - `yarn run start`
 
