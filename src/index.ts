@@ -15,14 +15,14 @@ const port = 3000;
 
 const getServerConfig =  async (): Promise<WgConfig> => {
     let srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
-    console.log("srv_conf_file\n\n", srv_conf_file)
+    //console.log("srv_conf_file\n\n", srv_conf_file)
 
     let server = new WgConfig({
-        srv_conf_file.wgInterface,
+        srv_conf_file,
         filePath: process.env.SERVER_CONFIG!
     })
     await server.generateKeys();
-    console.log("Server config\n\n", server)
+    //console.log("Server config\n\n", server)
     return server;
 }
 
@@ -39,7 +39,7 @@ app.get('/', (req: Request, res: Response) => {
 // GET server info {URL ,IP, PUBLIC KEY}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
-    return res.send(srv_info)
+    return res.send(srv_info.wgInterface)
 }));
 
 app.put('/client/', asyncHandler(async (req: Request, res: Response) => {
