@@ -13,7 +13,6 @@ var jsonParser = bodyParser.json()
 
 const port = 3000;
 const { exec } = require('child_process')
-//const { exec } = require('child_process');
 
 const getServerConfig =  async (): Promise<WgConfig> => {
     let srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
@@ -29,56 +28,50 @@ const getServerConfig =  async (): Promise<WgConfig> => {
 }
 
 const createClientConfig = async (): Promise<WgConfig> => {
-    //let client_conf_file = await 
+    let client_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
 
     if ( fs.existsSync('/etc/wireguard/')){
         console.log("ERROR: Wireguard folder already exists");
     } else {
         //exec('mkdir /etc/wireguard/ && cd /etc/wireguard/ && umask 077; wg genkey | tee privatekey | wg pubkey > publickey', (err : any, output : any) => {
-        exec('mkdir /etc/wireguard/ && cd /etc/wireguard/', (err : any, output : any) => {
+        exec('mkdir /etc/wireguard/ && cd /etc/wireguard/', async (err : any, output : any) => {
             if (err) {
                 console.error("could create the folder /etc/wireguard/: ", err)
                 return output;
-            }else{
-                const client = new WgConfig({
-                    wgInterface: { address: ['10.13.13.7'] },
-                        filePath: process.env.SERVER_CONFIG!
-                    })
-                  
-                    // gen keys
-                    //await Promise.all([
-                        //server.generateKeys({ preSharedKey: true }),
-                        //client.generateKeys({ preSharedKey: true })
-                    //])
-
-
-
-
-
-
-                console.log("Key Generated")
-                return client;
             }
+        
 
             
         })
     }
-    
+    const client = new WgConfig({
+        wgInterface: { address: ['10.13.13.7'] },
+            filePath: process.env.SERVER_CONFIG!
+        })
+      
+        // gen keys
+        await Promise.all([
+            //server.generateKeys({ preSharedKey: true }),
+            //client.generateKeys({ preSharedKey: true })
+        ])
+
+    console.log("Key Generated")
+    return client;
   
   // make a peer from server
-  const serverAsPeer = server.createPeer({
-    allowedIps: ['10.1.1.1/32'],
-    preSharedKey: server.preSharedKey
-  })
+  //const serverAsPeer = server.createPeer({
+  //  allowedIps: ['10.1.1.1/32'],
+  //  preSharedKey: server.preSharedKey
+  //})
   
   // add that as a peer to client
-  client.addPeer(serverAsPeer)
+  //client.addPeer(serverAsPeer)
   
   // make a peer from client and add it to server
-  server.addPeer(client.createPeer({
-    allowedIps: ['10.10.1.1/32'],
-    preSharedKey: client.preSharedKey
-  }))
+  //server.addPeer(client.createPeer({
+  //  allowedIps: ['10.10.1.1/32'],
+  //  preSharedKey: client.preSharedKey
+  //}))
 
 
 
@@ -181,6 +174,7 @@ app.put('/client/', jsonParser, async (req: Request, res: Response)=>{
   });
 });
 */
+
 
 function syncReadFile(filename: string) {
     const result = readFileSync(filename);

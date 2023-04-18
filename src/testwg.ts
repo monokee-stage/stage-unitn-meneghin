@@ -1,22 +1,36 @@
 import path from 'path'
-import { WgConfig, WgConfigPeer } from 'wireguard-tools'
+import { WgConfig } from 'wireguard-tools'
 
 const filePath = path.join(__dirname, '/configs', '/guardline-server.conf')
+const filePath2 = path.join(__dirname, '/configs', '/guardline-client.conf')
 
-const config1 = new WgConfig({
+const server = new WgConfig({
   wgInterface: { address: ['10.10.1.1'] },
   filePath
 })
 
-const server: WgConfigPeer = {
-    name: "WGServer",
-    endpoint: "10.1.0.1",
-    publicKey: "xxxxxxxxxxxxx",
-    persistentKeepalive: 15
-}
-
-config1.addPeer(server)
-
-config1.generateKeys().then(() => {
-   console.log(config1);
+const client = new WgConfig({
+  wgInterface: { address: ['10.10.1.2'] },
+  filePath: filePath2
 })
+
+// gen keys
+//await Promise.all([
+  //server.generateKeys({ preSharedKey: true }),
+  //client.generateKeys({ preSharedKey: true })
+//])
+
+// make a peer from server
+const serverAsPeer = server.createPeer({
+  allowedIps: ['10.1.1.1/32'],
+  preSharedKey: server.preSharedKey
+})
+
+// add a client already created in the server wg0.conf
+client.addPeer(serverAsPeer)
+
+// make a peer from client and add it to server
+server.addPeer(client.createPeer({
+  allowedIps: ['10.10.1.1/32'],
+  preSharedKey: client.preSharedKey
+}))
