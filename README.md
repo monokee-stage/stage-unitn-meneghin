@@ -35,8 +35,6 @@
 
 ### [wireguard-tools](https://www.npmjs.com/package/wireguard-tools)
   - `npm i wireguard-tools`
-### wgconfig
-  -`pip3 install wgconfig`
 
 > NOTE Only if you encure in issues doing `yarn run build`
   - `npm i --save-dev`
