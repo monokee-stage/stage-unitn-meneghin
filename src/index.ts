@@ -36,15 +36,17 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello, this is Express + TypeScript');
 });
 
-// GET server info {URL ,IP, PUBLIC KEY}
+// GET server info {Address, PublicKey, ListenPort}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
-    var data = {
+    let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!)
+    var srv_data = {
         PublicKey: srv_info.publicKey,
         Address: srv_info.wgInterface.address,
-        ListenPort: srv_info.wgInterface.listenPort
-      };
-    return res.send( data )
+        ListenPort: srv_info.wgInterface.listenPort,
+        Endpoint: srv_endpoin
+    };
+    return res.send( srv_data )
 }));
 
 app.put('/client/', asyncHandler(async (req: Request, res: Response) => {
