@@ -40,8 +40,8 @@ app.get('/', (req: Request, res: Response) => {
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
     
-    let srv_listenport = (srv_info.wgInterface.listenPort).toString();
-    let srv_endpoin = process.env.SERVER_IP!.concat(':').concat(srv_listenport)   // or -- //let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!)
+    //let srv_listenport = (srv_info.wgInterface.listenPort);
+    let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!) // or - Not Working - let srv_endpoin = process.env.SERVER_IP!.concat(':').concat(srv_listenport.toString()) 
     let srv_allowedips = process.env.SERVER_NETWORK!
 
     var srv_data = {
