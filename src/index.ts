@@ -39,12 +39,18 @@ app.get('/', (req: Request, res: Response) => {
 // GET server info {Address, PublicKey, ListenPort}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
-    let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!)
+    
+    let srv_listenport = (srv_info.wgInterface.listenPort).toString();
+    let srv_endpoin = process.env.SERVER_IP!.concat(':').concat(srv_listenport)   // or -- //let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!)
+    let srv_allowedips = process.env.SERVER_NETWORK!
+
     var srv_data = {
-        PublicKey: srv_info.publicKey,
-        Address: srv_info.wgInterface.address,
-        ListenPort: srv_info.wgInterface.listenPort,
-        Endpoint: srv_endpoin
+        //ListenPort: srv_info.wgInterface.listenPort,
+        //Address: srv_info.wgInterface.address,
+        PublicKey: srv_info.publicKey!,
+        AllowedIPs: srv_allowedips,
+        Endpoint: srv_endpoin,
+        PersistentKeepAlive: "15"
     };
     return res.send( srv_data )
 }));
