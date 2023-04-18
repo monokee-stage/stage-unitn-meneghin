@@ -8,6 +8,8 @@
   - `sudo npm install -g yarn`
 - typescript
   - `npm install typescript`
+- [wireguard-tools](https://www.npmjs.com/package/wireguard-tools)
+  - `npm i wireguard-tools`
 
 ## Run the project
 In order to run the project you must run it from a terminal with sudo permissions
