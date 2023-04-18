@@ -39,6 +39,16 @@
 > NOTE Only if you encure in issues doing `yarn run build`
   - `npm i --save-dev`
 
+## Build the .env file as follow, replaceing the fields with your data
+
+SERVER_URL="stage-meneghin1.intranet.athesys.it"
+SERVER_IP="10.111.0.44"
+SERVER_PUBKEY="RLGHcYlX5tkkkkkkkkkkkkkkkkkkkk1QYERHUz3c="
+SERVER_PORT="41194"
+SERVER_NETWORK="10.13.13.0/24"
+SERVER_INTERFACE="10.13.13.1"
+SERVER_CONFIG="/etc/wireguard/wg0.conf"
+
 ## Run the project
 In order to run the project you must run it from a terminal with sudo permissions
 - `yarn run build`
