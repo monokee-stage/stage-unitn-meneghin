@@ -18,7 +18,7 @@ const getServerConfig =  async (): Promise<WgConfig> => {
     console.log("srv_conf_file\n\n", srv_conf_file)
 
     let server = new WgConfig({
-        ...srv_conf_file,
+        srv_conf_file.wgInterface,
         filePath: process.env.SERVER_CONFIG!
     })
     await server.generateKeys();
