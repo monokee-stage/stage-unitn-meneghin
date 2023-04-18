@@ -35,6 +35,8 @@
 
 ### [wireguard-tools](https://www.npmjs.com/package/wireguard-tools)
   - `npm i wireguard-tools`
+### wgconfig
+  -`pip3 install wgconfig`
 
 > NOTE Only if you encure in issues doing `yarn run build`
   - `npm i --save-dev`
@@ -54,6 +56,8 @@ SERVER_NETWORK="10.13.13.0/24"
 SERVER_INTERFACE="10.13.13.1"
 
 SERVER_CONFIG="/etc/wireguard/wg0.conf"
+
+__________________________________________________________________________________________
 
 ## Run the project
 In order to run the project you must run it from a terminal with sudo permissions
