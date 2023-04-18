@@ -28,7 +28,7 @@ const getServerConfig =  async (): Promise<WgConfig> => {
 }
 
 const createClientConfig = async (): Promise<WgConfig> => {
-    let client_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
+    //let client_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
 
     if ( fs.existsSync('/etc/wireguard/')){
         console.log("ERROR: Wireguard folder already exists");
