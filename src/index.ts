@@ -40,8 +40,9 @@ app.get('/', (req: Request, res: Response) => {
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
     var data = {
-        publinKey: srv_info.publicKey,
-        Interface: srv_info.wgInterface
+        PublicKey: srv_info.publicKey,
+        Address: srv_info.wgInterface.address,
+        ListenPort: srv_info.wgInterface.listenPort
       };
     return res.send( data )
 }));
