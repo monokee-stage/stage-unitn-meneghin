@@ -36,18 +36,20 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello, this is Express + TypeScript');
 });
 
-// GET server info {Address, PublicKey, ListenPort}
+// GET server info {PublicKey , ListenPort}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
-    
-    //let srv_listenport = (srv_info.wgInterface.listenPort);
+    let srv_pubkey = srv_info.publicKey!
+    let srv_ip = srv_info.wgInterface.address!.toString() //
+    //let srv_listenport = srv_info.wgInterface.listenPort
     let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!) // or - Not Working - let srv_endpoin = process.env.SERVER_IP!.concat(':').concat(srv_listenport.toString()) 
     let srv_allowedips = process.env.SERVER_NETWORK!
 
     var srv_data = {
         //ListenPort: srv_info.wgInterface.listenPort,
         //Address: srv_info.wgInterface.address,
-        PublicKey: srv_info.publicKey!,
+        wgInterface: srv_ip,
+        PublicKey: srv_pubkey,
         AllowedIPs: srv_allowedips,
         Endpoint: srv_endpoin,
         PersistentKeepAlive: "15"
