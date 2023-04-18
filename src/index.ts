@@ -12,10 +12,8 @@ const app: Express = express();
 var jsonParser = bodyParser.json()
 
 const port = 3000;
-//const { exec } = require('node:child_process')
 
 const getServerConfig =  async (): Promise<WgConfig> => {
-    console.log("ENV VAR", process.env.SERVER_CONFIG)
     let srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
     console.log("srv_conf_file", srv_conf_file)
 
@@ -23,7 +21,6 @@ const getServerConfig =  async (): Promise<WgConfig> => {
         ...srv_conf_file,
         filePath: process.env.SERVER_CONFIG!
     })
-    console.log("Server conf", server)
     await server.generateKeys();
     console.log("Server conf", server)
     return server;
@@ -41,9 +38,8 @@ app.get('/', (req: Request, res: Response) => {
 
 // GET server info {URL ,IP, PUBLIC KEY}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
-    // forse non risolve, metti await
-    let x = await getServerConfig()
-    return res.send(x)
+    let srv_info = await getServerConfig()
+    return res.send(srv_info)
 }));
 
 app.put('/client/', asyncHandler(async (req: Request, res: Response) => {
