@@ -57,6 +57,7 @@ const createClientConfig = async (): Promise<WgConfig> => {
 
 
                 console.log("Key Generated")
+                return client;
             }
 
             
