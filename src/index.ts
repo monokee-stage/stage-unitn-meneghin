@@ -39,11 +39,11 @@ app.get('/', (req: Request, res: Response) => {
 // GET server info {URL ,IP, PUBLIC KEY}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
-    return res.send(srv_info.wgInterface.listenPort )
+    return res.send( srv_info.publicKey )
 }));
 
 app.put('/client/', asyncHandler(async (req: Request, res: Response) => {
-
+    return res.send("put req")
 }));
 /*
 // PUT client info into variables {group, IP, pubkey} 
