@@ -13,6 +13,6 @@ In order to run the project you must run it from a terminal with sudo permission
 - `yarn run start`
 
 ## Test the API
-I'm using Postman
+I'm using Postman, `sudo snap install postman`
 - **PUT** request at http://localhost:3000/client
 - **GET** request ad http://localhost:3000/server
