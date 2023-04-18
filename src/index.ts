@@ -12,6 +12,8 @@ const app: Express = express();
 var jsonParser = bodyParser.json()
 
 const port = 3000;
+const { exec } = require('child_process')
+//const { exec } = require('child_process');
 
 const getServerConfig =  async (): Promise<WgConfig> => {
     let srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
@@ -36,19 +38,20 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello, this is Express + TypeScript');
 });
 
-// GET server info {PublicKey , ListenPort}
+
+// GET server info {PublicKey, AllowedIPs, Endpoint, PersistentKeepAlive}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
     let srv_pubkey = srv_info.publicKey!
-    let srv_ip = srv_info.wgInterface.address!.toString() //
-    //let srv_listenport = srv_info.wgInterface.listenPort
-    let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!) // or - Not Working - let srv_endpoin = process.env.SERVER_IP!.concat(':').concat(srv_listenport.toString()) 
+    let srv_ip = srv_info.wgInterface.address!.toString() // 10.13.13.1/24
+    //let srv_listenport = srv_info.wgInterface.listenPort!.toString()
+
+    let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!) // or - Not Working - let srv_endpoin = process.env.SERVER_IP!.concat(':').concat(srv_listenport) 
     let srv_allowedips = process.env.SERVER_NETWORK!
 
     var srv_data = {
         //ListenPort: srv_info.wgInterface.listenPort,
-        //Address: srv_info.wgInterface.address,
-        wgInterface: srv_ip,
+        //Address: srv_ip,
         PublicKey: srv_pubkey,
         AllowedIPs: srv_allowedips,
         Endpoint: srv_endpoin,
@@ -57,7 +60,29 @@ app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     return res.send( srv_data )
 }));
 
+
+// PUT client
 app.put('/client/', asyncHandler(async (req: Request, res: Response) => {
+    
+    if ( fs.existsSync('/etc/wireguard/')){
+        console.log("*** Wireguard folder already exists ***");
+        return false;
+    } else {
+        exec('mkdir /etc/wireguard/ && cd /etc/wireguard/ && umask 077; wg genkey | tee privatekey | wg pubkey > publickey', (err : any, output : any) => {
+            if (err) {
+                console.error("could not execute command: ", err)
+                return false;
+            }
+            console.log("keys generated")
+        })
+    }
+    
+    
+    
+    
+    
+    
+    
     return res.send("put req")
 }));
 /*
