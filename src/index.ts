@@ -15,14 +15,14 @@ const port = 3000;
 
 const getServerConfig =  async (): Promise<WgConfig> => {
     let srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
-    console.log("srv_conf_file", srv_conf_file)
+    console.log("srv_conf_file\n\n", srv_conf_file)
 
     let server = new WgConfig({
         ...srv_conf_file,
         filePath: process.env.SERVER_CONFIG!
     })
     await server.generateKeys();
-    console.log("Server conf", server)
+    console.log("Server config\n\n", server)
     return server;
 }
 
