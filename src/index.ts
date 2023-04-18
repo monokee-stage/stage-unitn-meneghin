@@ -28,6 +28,63 @@ const getServerConfig =  async (): Promise<WgConfig> => {
     return server;
 }
 
+const createClientConfig = async (): Promise<WgConfig> => {
+    //let client_conf_file = await 
+
+    if ( fs.existsSync('/etc/wireguard/')){
+        console.log("ERROR: Wireguard folder already exists");
+    } else {
+        //exec('mkdir /etc/wireguard/ && cd /etc/wireguard/ && umask 077; wg genkey | tee privatekey | wg pubkey > publickey', (err : any, output : any) => {
+        exec('mkdir /etc/wireguard/ && cd /etc/wireguard/', (err : any, output : any) => {
+            if (err) {
+                console.error("could create the folder /etc/wireguard/: ", err)
+                return output;
+            }else{
+                const client = new WgConfig({
+                    wgInterface: { address: ['10.13.13.7'] },
+                        filePath: process.env.SERVER_CONFIG!
+                    })
+                  
+                    // gen keys
+                    //await Promise.all([
+                        //server.generateKeys({ preSharedKey: true }),
+                        //client.generateKeys({ preSharedKey: true })
+                    //])
+
+
+
+
+
+
+                console.log("Key Generated")
+            }
+
+            
+        })
+    }
+    
+  
+  // make a peer from server
+  const serverAsPeer = server.createPeer({
+    allowedIps: ['10.1.1.1/32'],
+    preSharedKey: server.preSharedKey
+  })
+  
+  // add that as a peer to client
+  client.addPeer(serverAsPeer)
+  
+  // make a peer from client and add it to server
+  server.addPeer(client.createPeer({
+    allowedIps: ['10.10.1.1/32'],
+    preSharedKey: client.preSharedKey
+  }))
+
+
+
+
+}
+
+
 const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fun(req, res, next))
         .catch(next)
@@ -64,27 +121,12 @@ app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
 // PUT client
 app.put('/client/', asyncHandler(async (req: Request, res: Response) => {
     
-    if ( fs.existsSync('/etc/wireguard/')){
-        console.log("*** Wireguard folder already exists ***");
-        return false;
-    } else {
-        exec('mkdir /etc/wireguard/ && cd /etc/wireguard/ && umask 077; wg genkey | tee privatekey | wg pubkey > publickey', (err : any, output : any) => {
-            if (err) {
-                console.error("could not execute command: ", err)
-                return false;
-            }
-            console.log("keys generated")
-        })
-    }
-    
-    
-    
-    
-    
-    
-    
+    createClientConfig()
     return res.send("put req")
 }));
+
+
+
 /*
 // PUT client info into variables {group, IP, pubkey} 
 app.put('/client/', jsonParser, async (req: Request, res: Response)=>{    
