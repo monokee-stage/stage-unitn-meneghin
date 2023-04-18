@@ -1,6 +1,9 @@
 ## Prerequisites
-- Node
+- npm
+- nvm
+- Node 12.22.12
   - check the version with `node -v`
+  - `apt install npm`
 - yarn
   - `sudo npm install -g yarn`
 - typescript
