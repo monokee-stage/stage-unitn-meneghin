@@ -39,7 +39,11 @@ app.get('/', (req: Request, res: Response) => {
 // GET server info {URL ,IP, PUBLIC KEY}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
-    return res.send( srv_info.publicKey )
+    var data = {
+        publinKey: srv_info.publicKey,
+        Interface: srv_info.wgInterface
+      };
+    return res.send( data )
 }));
 
 app.put('/client/', asyncHandler(async (req: Request, res: Response) => {
