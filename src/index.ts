@@ -30,7 +30,7 @@ const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunct
 }
 
 let getServerConfig = async (): Promise<WgConfig> => {
-    let srv_conf_file = await getConfigObjectFromFile({ filePath: "/home/mattia/test/guardline-server.conf"}) //filePath: process.env.SERVER_CONFIG! })
+    let srv_conf_file = await getConfigObjectFromFile({ filePath: "/home/test/guardline-server.conf"}) //filePath: process.env.SERVER_CONFIG! })
     let server = new WgConfig({
         ...srv_conf_file,
         filePath: process.env.SERVER_CONFIG!
