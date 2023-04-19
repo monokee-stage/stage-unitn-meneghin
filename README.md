@@ -69,3 +69,6 @@ ________________________________________________________________________________
 I'm using Postman, `sudo snap install postman`
 - **PUT** request at http://localhost:3000/client
 - **GET** request ad http://localhost:3000/server
+
+## Attention
+In order to use the library the wg.conf file MUST be a binary file, so the "touch" mode won't work with the library read-file function
