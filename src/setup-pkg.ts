@@ -1,6 +1,6 @@
 const { exec } = require('child_process')
 
-exec('cd~')
+exec('cd ~/stage-unitn-meneghin')
 exec('apt update && apt install nodejs -y && node -v')
 exec('apt install npm -y')
  
