@@ -73,8 +73,6 @@ const getAvailableIp = async (): Promise<string> => {
 //***************************************************************** */
 //DA ELIMINARE
 
-const __dirname = "/home/"
-
 //const filePath = path.join(__dirname, '/configs', '/guardline-server.conf')
 const filePath = "/home/test/guardline-server.conf"
 
@@ -108,7 +106,7 @@ const test = async () => {
 
     // read that file into another config object
     const thatConfigFromFile = await getConfigObjectFromFile({ filePath })
-    const config2FilePath = path.join(__dirname, '/configs', '/guardline-server-2.conf')
+    const config2FilePath = path.join('/home/test', '/guardline-server-2.conf')
     const config2 = new WgConfig({
       ...thatConfigFromFile,
       filePath: config2FilePath
