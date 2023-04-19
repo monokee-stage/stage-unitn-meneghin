@@ -40,6 +40,7 @@ I'm assuming you are cloning this repo into your $HOME
 
 > NOTE Only if you encure in issues doing `yarn run build`
   - `npm i --save-dev`
+_________________________________________________________________________________________
 
 ## Build the .env file as follow, replaceing the fields with your data
 
@@ -60,6 +61,10 @@ In order to run the project you must run it from a terminal with sudo permission
 
 ## Into a new machine you can run the script (maybe you need sudo permissions)
 `sh ~stage-unitn-meneghin/src/setup-pkg.sh`
+- It install all the npm packages and build the .env file that must be customize with your server data.
+- It build and start the ts files.
+_________________________________________________________________________________________
+
 ## Test the API
 I'm using Postman, `sudo snap install postman`
 - **PUT** request at http://localhost:3000/client
