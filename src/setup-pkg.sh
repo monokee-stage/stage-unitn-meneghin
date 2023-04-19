@@ -2,7 +2,7 @@ cd ~/stage-unitn-meneghin
 apt update && apt install nodejs -y && node -v
 apt install npm -y
  
-apt install curl && curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+apt install curl -y && curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 source ~/.bashrc
 nvm install 12.22.12 && nvm use 12.22.12
 

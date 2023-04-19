@@ -1,9 +1,11 @@
 ## Prerequisites
-
+I'm assuming you are cloning this repo into your $HOME
+- `cd ~`
+- `git clone https://github.com/monokee-stage/stage-unitn-meneghin.git` (or ssh)
 ### [npm](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-20-04)
   - `sudo apt update`
   - `sudo apt install nodejs -y`
-  - `node -v` Output **v10.19.0**
+  - `node -v` Output **v10.19.0** if you are on Ubuntu 20.04
   - `sudo apt install npm -y`
  
 ### [nvm](https://tecadmin.net/how-to-install-nvm-on-ubuntu-20-04/)
@@ -41,18 +43,12 @@
 
 ## Build the .env file as follow, replaceing the fields with your data
 
-SERVER_URL="stage-meneghin1.intranet.athesys.it"
-
-SERVER_IP="10.111.0.44"
-
-SERVER_PUBKEY="RLGHcYlX5tkkkkkkkkkkkkkkkkkkkk1QYERHUz3c="
-
-SERVER_PORT="41194"
-
-SERVER_NETWORK="10.13.13.0/24"
-
-SERVER_INTERFACE="10.13.13.1"
-
+SERVER_URL="stage-meneghin1.intranet.athesys.it" \
+SERVER_IP="10.111.0.44" \
+SERVER_PUBKEY="RLGHcYlX5tkkkkkkkkkkkkkkkkkkkk1QYERHUz3c=" \
+SERVER_PORT="41194" \
+SERVER_NETWORK="10.13.13.0/24" \
+SERVER_INTERFACE="10.13.13.1" \
 SERVER_CONFIG="/etc/wireguard/wg0.conf"
 
 __________________________________________________________________________________________
@@ -62,6 +58,8 @@ In order to run the project you must run it from a terminal with sudo permission
 - `yarn run build`
 - `yarn run start`
 
+## Into a new machine you can run the script (maybe you need sudo permissions)
+`sh ~stage-unitn-meneghin/src/setup-pkg.sh`
 ## Test the API
 I'm using Postman, `sudo snap install postman`
 - **PUT** request at http://localhost:3000/client
