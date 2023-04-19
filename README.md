@@ -4,7 +4,7 @@
   - `sudo apt update`
   - `sudo apt install nodejs -y`
   - `node -v` Output **v10.19.0**
-  - `sudo apt install npm`
+  - `sudo apt install npm -y`
  
 ### [nvm](https://tecadmin.net/how-to-install-nvm-on-ubuntu-20-04/)
   - `sudo apt install curl` 
@@ -28,7 +28,7 @@
   - `npm install --save path`
 
 ### [yarn](https://www.npmjs.com/package/yarn)
-  - `sudo npm install -g yarn`
+  - `npm install -g yarn`
 
 ### [typescript](https://www.npmjs.com/package/typescript)
   - `npm install typescript`

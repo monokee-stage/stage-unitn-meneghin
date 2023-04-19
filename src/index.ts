@@ -17,12 +17,16 @@ import {
     parseConfigString,
     } from 'wireguard-tools'
 var bodyParser = require('body-parser')
-
-const app: Express = express();
 var jsonParser = bodyParser.json()
 
+const app: Express = express();
 const port = 3000;
 const { exec } = require('child_process')
+
+const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fun(req, res, next))
+        .catch(next)
+}
 
 const getServerConfig =  async (): Promise<WgConfig> => {
     let srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
@@ -68,17 +72,6 @@ const createClientConfig = async () =>{ //: Promise<string>
 }
 
 
-const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fun(req, res, next))
-        .catch(next)
-}
-
-// APIs
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello, this is Express + TypeScript');
-});
-
-
 // GET server info {PublicKey, AllowedIPs, Endpoint, PersistentKeepAlive}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
@@ -108,61 +101,10 @@ app.put('/client/', asyncHandler(async (req: Request, res: Response) => {
 }));
 
 
-
-/*
-// PUT client info into variables {group, IP, pubkey} 
-app.put('/client/', jsonParser, async (req: Request, res: Response)=>{    
-  const client_peer = new WgConfig({
-    wgInterface: { address: ['10.10.1.1'] },
-    //filePath
-  })
-
-
-  if ( fs.existsSync('/etc/wireguard/')){
-      console.log("*** Wireguard folder already exists ***");
-      return false;
-  } else {
-      exec('mkdir /etc/wireguard/ && cd /etc/wireguard/ && umask 077; wg genkey | tee privatekey | wg pubkey > publickey', (err : any, output : any) => {
-          if (err) {
-              console.error("could not execute command: ", err)
-              return false;
-          }
-      })
-  }
-  
-  await delay(1000);
-
-  let group = req.body.group; // ???
-  let client_ip = "10.13.13.6" // TODO: fetch this from DB or other sources, take into account the user group
-  let client_publickey = (syncReadFile('/etc/wireguard/publickey')).toString();
-
-  // Read PrivateKey
-  const client_privatekey = (syncReadFile('/etc/wireguard/privatekey')).toString();
-
-  // Content of client's wg0.conf file
-  const client_info = "[interface]\nPrivateKey = " + client_privatekey + "Address = "+ client_ip +"/24\n";
-  const peer_info = "\n[peer]\nPublicKey = " + process.env.SERVER_PUBKEY + "\nAllowedIPs = " + process.env.SERVER_NETWORK + "\nEndpoint = "+ process.env.SERVER_IP +":" + process.env.SERVER_PORT + "\nPersistentKeepalive = 15";
-  const config = client_info.concat(peer_info.toString());
-  
-  // Write wg0.conf
-  syncWriteFile('/etc/wireguard/wg0.conf', config);
-  console.log("File created: /etc/wireguard/wg0.conf")
-
-  res.send({
-      "client" :{
-          "group": group,
-          "ip": client_ip,
-          "pubkey": client_publickey,
-      },
-      "server": {
-          "url": process.env.SERVER_URL,
-          "ip": process.env.SERVER_IP,
-          "pubkey": process.env.SERVER_PUBKEY
-      }
-  });
+// APIs
+app.get('/', (req: Request, res: Response) => {
+    res.send('Hello, this is Express + TypeScript');
 });
-*/
-
 
 function syncReadFile(filename: string) {
     const result = readFileSync(filename);
