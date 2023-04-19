@@ -2,10 +2,20 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import { readFileSync, writeFileSync } from 'fs';
-import fs from 'fs'
-import path from 'path'
-import { WgConfig, WgConfigPeer, getConfigObjectFromFile } from 'wireguard-tools'
+import * as fs from 'fs';
 import express, { Express, NextFunction, Request, Response } from 'express';
+import path from 'path'
+//import { WgConfig, WgConfigPeer, getConfigObjectFromFile } from 'wireguard-tools'
+
+import {
+    WgConfig,
+    WgConfigPeer,
+    getConfigObjectFromFile,
+    checkWgIsInstalled,
+    generateKeyPair,
+    generateConfigString,
+    parseConfigString,
+    } from 'wireguard-tools'
 var bodyParser = require('body-parser')
 
 const app: Express = express();
@@ -16,66 +26,45 @@ const { exec } = require('child_process')
 
 const getServerConfig =  async (): Promise<WgConfig> => {
     let srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
-    //console.log("srv_conf_file\n\n", srv_conf_file)
-
     let server = new WgConfig({
         ...srv_conf_file,
         filePath: process.env.SERVER_CONFIG!
     })
     await server.generateKeys();
-    //console.log("Server config\n\n", server)
     return server;
 }
 
-const createClientConfig = async (): Promise<WgConfig> => {
-    //let client_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG! })
-
+const createClientConfig = async () =>{ //: Promise<string>
     if ( fs.existsSync('/etc/wireguard/')){
-        console.log("ERROR: Wireguard folder already exists");
+        console.error("ERROR: Wireguard folder already exists");
     } else {
-        //exec('mkdir /etc/wireguard/ && cd /etc/wireguard/ && umask 077; wg genkey | tee privatekey | wg pubkey > publickey', (err : any, output : any) => {
-        exec('mkdir /etc/wireguard/ && cd /etc/wireguard/', async (err : any, output : any) => {
+            exec('mkdir /etc/wireguard/ && cd /etc/wireguard/', async (err : any, output : any) => {
             if (err) {
-                console.error("could create the folder /etc/wireguard/: ", err)
+                console.error("ERROR: Folder didn't created: /etc/wireguard/\n", err)
                 return output;
             }
         
-
-            
+        const { publicKey, privateKey, preSharedKey } = await generateKeyPair({ preSharedKey: true })       //Generate key pair
+        console.log({ publicKey, privateKey, preSharedKey })
+        
+        const client = generateConfigString({
+            wgInterface: {
+                name: 'Client test',
+                address: ['10.13.13.7'],
+                privateKey: privateKey // TO DO '6AgToMLuTa3lQMIMwIBVkhwSM0PVLCZD1FpqU5y0l2Q'
+            },
+            peers: [
+                {
+                    allowedIps: ['10.13.13.1/32'],
+                    publicKey: publicKey //TO DO 'FoSq0MiHw9nuHMiJcD2vPCzQScmn1Hu0ctfKfSfhp3s='
+                }
+            ]
         })
+        console.log(client)
+        return client
+        })
+        
     }
-    const client = new WgConfig({
-        wgInterface: { address: ['10.13.13.7'] },
-            filePath: process.env.SERVER_CONFIG!
-        })
-      
-        // gen keys
-        await Promise.all([
-            //server.generateKeys({ preSharedKey: true }),
-            //client.generateKeys({ preSharedKey: true })
-        ])
-
-    console.log("Key Generated")
-    return client;
-  
-  // make a peer from server
-  //const serverAsPeer = server.createPeer({
-  //  allowedIps: ['10.1.1.1/32'],
-  //  preSharedKey: server.preSharedKey
-  //})
-  
-  // add that as a peer to client
-  //client.addPeer(serverAsPeer)
-  
-  // make a peer from client and add it to server
-  //server.addPeer(client.createPeer({
-  //  allowedIps: ['10.10.1.1/32'],
-  //  preSharedKey: client.preSharedKey
-  //}))
-
-
-
-
 }
 
 
@@ -95,18 +84,15 @@ app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     let srv_info = await getServerConfig()
     let srv_pubkey = srv_info.publicKey!
     let srv_ip = srv_info.wgInterface.address!.toString() // 10.13.13.1/24
-    //let srv_listenport = srv_info.wgInterface.listenPort!.toString()
-
-    let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!) // or - Not Working - let srv_endpoin = process.env.SERVER_IP!.concat(':').concat(srv_listenport) 
-    let srv_allowedips = process.env.SERVER_NETWORK!
+    let srv_listenport = srv_info.wgInterface.listenPort!.toString()
+    let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(srv_listenport)
+    //let srv_allowedips = process.env.SERVER_NETWORK!
 
     var srv_data = {
         //ListenPort: srv_info.wgInterface.listenPort,
         //Address: srv_ip,
         PublicKey: srv_pubkey,
-        AllowedIPs: srv_allowedips,
-        Endpoint: srv_endpoin,
-        PersistentKeepAlive: "15"
+        Endpoint: srv_endpoin
     };
     return res.send( srv_data )
 }));
@@ -114,9 +100,11 @@ app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
 
 // PUT client
 app.put('/client/', asyncHandler(async (req: Request, res: Response) => {
-    
-    createClientConfig()
-    return res.send("put req")
+    const version = await checkWgIsInstalled()
+    console.log(version)
+
+    let client_info = await createClientConfig()
+    return res.send(client_info)
 }));
 
 
@@ -190,6 +178,8 @@ function syncWriteFile(filename: string, data: any) {
 function delay(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+
 
 app.listen(port, () => {
     console.log(`[Server]: I am running at https://localhost:${port}`);
