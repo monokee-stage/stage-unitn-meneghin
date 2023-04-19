@@ -45,18 +45,18 @@ const createClientConfig = async () =>{ //: Promise<string>
             }
         
         const { publicKey, privateKey, preSharedKey } = await generateKeyPair({ preSharedKey: true })       //Generate key pair
-        console.log({ publicKey, privateKey, preSharedKey })
+        //console.log({ publicKey, privateKey, preSharedKey })
         
         const client = generateConfigString({
             wgInterface: {
                 name: 'Client test',
                 address: ['10.13.13.7'],
-                privateKey: privateKey // TO DO '6AgToMLuTa3lQMIMwIBVkhwSM0PVLCZD1FpqU5y0l2Q'
+                privateKey: privateKey
             },
             peers: [
                 {
-                    allowedIps: ['10.13.13.1/32'],
-                    publicKey: publicKey //TO DO 'FoSq0MiHw9nuHMiJcD2vPCzQScmn1Hu0ctfKfSfhp3s='
+                    allowedIps: [process.env.SERVER_NETWORK!],
+                    publicKey: publicKey
                 }
             ]
         })
