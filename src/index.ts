@@ -17,6 +17,8 @@ import {
     parseConfigString,
     createPeerPairs
     } from 'wireguard-tools'
+
+    const util = require('util');
 var bodyParser = require('body-parser')
 var jsonParser = bodyParser.json()
 
@@ -30,7 +32,7 @@ const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunct
 }
 
 let getServerConfig = async (): Promise<WgConfig> => {
-    let srv_conf_file = await getConfigObjectFromFile({ filePath: "/home/test/guardline-server.conf"}) //filePath: process.env.SERVER_CONFIG! })
+    let srv_conf_file = await getConfigObjectFromFile({ filePath: "/home/mattia/test/guardline-server.conf"}) //filePath: process.env.SERVER_CONFIG! })
     let server = new WgConfig({
         ...srv_conf_file,
         filePath: process.env.SERVER_CONFIG!
@@ -60,34 +62,42 @@ const getAllIps = (__peer: WgConfigPeer): string[] => {
 }
 
 const getAvailableIp = async (): Promise<string> => {
-    let srv_info = getServerConfig()              // Parse server file config
+    //let srv_info = await getServerConfig()              // Parse server file config
     //const allPeersss = srv_info.peers               // couples of IP-Pubkey of all peers
     //const srv_interface = srv_info.wgInterface      // wg interface settings
     //console.log("All peers", allPeersss)
 
     //const list = getAllIps(srv_info)
+    
+    //console.log( free_ip.toString() )
 
-    return '10.13.13.8'                                   //must return a single free ip in the subnetwork 10.13.13.X
+    let mask = ""
+    var ipF = {ip: "10.13.13.8", mask: "/24"}
+    console.log(ipF)
+    
+    return mask                                  //must return a single free ip in the subnetwork 10.13.13.X
+    
 }
 
 
 // GET server info {PublicKey, AllowedIPs, Endpoint, PersistentKeepAlive}
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
-    let srv_info = await getServerConfig()
-    let srv_pubkey = srv_info.publicKey!
+    //let srv_info = await getServerConfig()
+    //let srv_pubkey = srv_info.publicKey!
     //let srv_ip = srv_info.wgInterface.address!.toString() // 10.13.13.1/24
         //let srv_listenport = srv_info.wgInterface.listenPort!.toString()
         //let srv_endpoin = (process.env.SERVER_IP!).concat(':'.toString()).concat(srv_listenport)
         //let srv_allowedips = process.env.SERVER_NETWORK!
-    const srv_endpoint = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!)
+    //const srv_endpoint = (process.env.SERVER_IP!).concat(':'.toString()).concat(process.env.SERVER_PORT!)
     var srv_data = {
         //ListenPort: srv_info.wgInterface.listenPort,
         //Address: srv_ip,
-        PublicKey: srv_pubkey,
-        Endpoint: srv_endpoint
+        //PublicKey: srv_pubkey,
+        //Endpoint: srv_endpoint
     };
     //return res.send( srv_data )
     const free_ip = await getAvailableIp()
+    
     return res.send( free_ip )                  //10.13.13.8
 
 }));
