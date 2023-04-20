@@ -75,7 +75,7 @@ const getAvailableIp = async (): Promise<string> => {
     var ipF = {ip: "10.13.13.8", mask: "/24"}
     console.log(ipF)
     
-    return list[1]                                  //must return a single free ip in the subnetwork 10.13.13.X
+    return list[0]                                  //must return a single free ip in the subnetwork 10.13.13.X
     
 }
 
