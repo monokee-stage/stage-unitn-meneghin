@@ -36,70 +36,60 @@ const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunct
 
 
 let getServerConfig = async (): Promise<WgConfig> => {
-    
-    const srv_conf_file2 = await getConfigStringFromFile({ filePath: process.env.SERVER_CONFIG!}) //filePath: process.env.SERVER_CONFIG! })
-    console.log("getConfigStringFromFile", srv_conf_file2)
 
     const srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG!}) //filePath: process.env.SERVER_CONFIG! })
-    console.log("getConfigObjectFromFile", srv_conf_file)
 
     let server1 = new WgConfig({
         ...srv_conf_file,
         filePath: process.env.SERVER_CONFIG!
     })
-    console.log("server1\n", server1)
     await server1.generateKeys();
-    console.log("KEYGEN\n",server1)
     return server1;
 }
 
-const getAllIps = (__peer: WgConfigPeer): string[] => {         // Return a list whose contains all the busy ips in the range [10.13.13.1 - 10.13.13.255]
-    //const all_Peers = __peer.peers
-    const num_peers = Object.keys(__peer).length;
-    console.log("peers: \n",__peer)
-    console.log("numero peers: ", num_peers)
-    var ip_list : string[] = [ '10.13.13.1/32', '10.13.13.255/32' ]
-    //return "ips: " + peers.allowedIps;
+const getAllIpsUsed = async (): Promise<string[]> => {         // Return a list whose contains all the busy ips in the range [10.13.13.1 - 10.13.13.255]
     
+    let srv_info = await getServerConfig()                                          // Parse server file config
+    const allPeersss = srv_info.peers                                               // obj contains couples of IP-Pubkey of all peers
+    //const srv_interface = srv_info.wgInterface                                    // wg interface settings
+    console.log("All peersss @ 55", allPeersss)
+
+    const num_peers = Object.keys(allPeersss!).length;
+    console.log("numero peers: @ 58", num_peers)
+
+    var ip_list : string[] = [ '10.13.13.1/32', '10.13.13.255/32' ]
     
     for(let i=2; i<num_peers+2; i++ ){              // Avoid 10.13.13.1 and 10.13.13.255
-        let ip_peer = __peer.allowedIps
-        console.log(i, "print: ",  ip_peer!)
+        
+        let ip_peer = allPeersss
 
+        for(let j=0; j<num_peers; j++ ){
+            const ip_peer_f = Object.values(ip_peer![j].allowedIps![0])
+
+            console.log(j, "print: ",  ip_peer_f)
+            //ip_list[i] = ip_peer_f
+        }
         //ip_list[i] = ip_peer
-        console.log(ip_list[i],"\n")
+        //console.log(ip_list[i],'\n')
     }
-    console.log(ip_list[0],ip_list[1])
+    
     return ip_list
 }
 
-const getAvailableIp = async (): Promise<string> => {
-    console.log( "getAvailableIp" )
+const getAvailableIp = async (): Promise<string[]> => {
+
     let srv_info = await getServerConfig()              // Parse server file config
-    console.log( "srv_info" )
     const allPeersss = srv_info.peers               // couples of IP-Pubkey of all peers
     //const srv_interface = srv_info.wgInterface      // wg interface settings
-    console.log("All peersss @ 82", allPeersss)
+    //console.log("All peersss @ 82", allPeersss)
 
-    const list = getAllIps(srv_info)
-    console.log("list @ 85", list )
+    const list = getAllIpsUsed()
     
-    var ipF = {ip: "10.13.13.8", mask: "/24"}
-    console.log(ipF)
-    var ipG = list[0]
+    //var ipF = {ip: "10.13.13.8", mask: "/24"}
 
-    return ipG                                  //must return a single free ip in the subnetwork 10.13.13.X
+    return list                                  //must return a single free ip in the subnetwork 10.13.13.X
     
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -255,9 +245,9 @@ app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
         //Endpoint: srv_endpoint
     };
     //return res.send( srv_data )
-    //const free_ip = await getAvailableIp()
+    const free_ip = await getAvailableIp()
     
-    return res.send( createServerFile() )                  //10.13.13.8
+    return res.send( free_ip )                  //10.13.13.8
 
 }));
 
