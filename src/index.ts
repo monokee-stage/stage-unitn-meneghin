@@ -47,41 +47,44 @@ let getServerConfig = async (): Promise<WgConfig> => {
     return server1;
 }
 
-const getAllIpsUsed = async (): Promise<string[]> => {         // Return a list whose contains all the busy ips in the range [10.13.13.1 - 10.13.13.255]
+const getAllIpsUsed = async (): Promise<string[]> => {                          // Return a list whose contains all the busy ips in the range [10.13.13.1 - 10.13.13.255]
     
-    let srv_info = await getServerConfig()                                          // Parse server file config
-    const allPeersss = srv_info.peers                                               // obj contains couples of IP-Pubkey of all peers
-    //const srv_interface = srv_info.wgInterface                                    // wg interface settings
-    console.log("All peersss @ 55", allPeersss)
-
-    const num_peers = Object.keys(allPeersss!).length;
-    console.log("numero peers: @ 58", num_peers)
-
-    var ip_list : string[] = [ '10.13.13.1/32', '10.13.13.255/32' ]
+    let srv_info = await getServerConfig()                                      // Parse server file config
     
-    for(let i=2; i<num_peers+2; i++ ){              // Avoid 10.13.13.1 and 10.13.13.255
-        
-        let ip_peer = allPeersss
+    //const srv_interface = srv_info.wgInterface                                // obj contains wg interface settings
+    const allPeers = srv_info.peers                                             // obj contains couples of IP-Pubkey of all peers
+    console.log("All peers: ", allPeers)
 
+    var ip_list : string[] = [ '10.13.13.1', '10.13.13.255' ]                   // Maybe /32
+    const num_peers = Object.keys(allPeers!).length;
+    console.log("Amount of peers: ", num_peers)
+    console.log("Total busy IPs: ",(num_peers+ip_list.length))
+    console.log("Amount of IPs available:", (255-(num_peers+ip_list.length)))   // Using Subnet = 00000000, wildcard = 11111111 255 Ips available
+
+    for(let i=2; i<num_peers+2; i++ ){                                          // For to build the string to be returned, Avoid 10.13.13.1 and 10.13.13.255
+                                                                                
         for(let j=0; j<num_peers; j++ ){
-            const ip_peer_f = Object.values(ip_peer![j].allowedIps![0])
+            const ipOfPeerChars = Object.values(allPeers![j].allowedIps![0])
+            let ipOfPeerStr = ""
 
-            console.log(j, "print: ",  ip_peer_f)
-            //ip_list[i] = ip_peer_f
+            for(let k=0; k<ipOfPeerChars.length; k++ ){
+                ipOfPeerStr = ipOfPeerStr.concat(ipOfPeerChars[k])
+                
+            }
+            ip_list[j+2] = ipOfPeerStr
         }
-        //ip_list[i] = ip_peer
-        //console.log(ip_list[i],'\n')
-    }
     
+    }
+    console.log("BUSY IP LIST", ip_list)
     return ip_list
 }
 
 const getAvailableIp = async (): Promise<string[]> => {
 
     let srv_info = await getServerConfig()              // Parse server file config
-    const allPeersss = srv_info.peers               // couples of IP-Pubkey of all peers
+    const allPeers = srv_info.peers               // couples of IP-Pubkey of all peers
     //const srv_interface = srv_info.wgInterface      // wg interface settings
-    //console.log("All peersss @ 82", allPeersss)
+    //console.log("All peersss @ 82", allPeers)
 
     const list = getAllIpsUsed()
     
