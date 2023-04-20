@@ -41,7 +41,7 @@ let getServerConfig = async (): Promise<WgConfig> => {
     return server;
 }
 
-const getAllIps = (__peer: WgConfigPeer): string[] => { 
+const getAllIps = (__peer: WgConfigPeer): string[] => {         // Return a list whose contains all the busy ips in the range [10.13.13.1 - 10.13.13.255]
     //const all_Peers = __peer.peers
     const num_peers = Object.keys(__peer).length;
     console.log("peers: \n",__peer)
@@ -62,12 +62,12 @@ const getAllIps = (__peer: WgConfigPeer): string[] => {
 }
 
 const getAvailableIp = async (): Promise<string> => {
-    //let srv_info = await getServerConfig()              // Parse server file config
+    let srv_info = await getServerConfig()              // Parse server file config
     //const allPeersss = srv_info.peers               // couples of IP-Pubkey of all peers
     //const srv_interface = srv_info.wgInterface      // wg interface settings
     //console.log("All peers", allPeersss)
 
-    //const list = getAllIps(srv_info)
+    const list = getAllIps(srv_info)
     
     //console.log( free_ip.toString() )
 
@@ -75,7 +75,7 @@ const getAvailableIp = async (): Promise<string> => {
     var ipF = {ip: "10.13.13.8", mask: "/24"}
     console.log(ipF)
     
-    return mask                                  //must return a single free ip in the subnetwork 10.13.13.X
+    return list[1]                                  //must return a single free ip in the subnetwork 10.13.13.X
     
 }
 
