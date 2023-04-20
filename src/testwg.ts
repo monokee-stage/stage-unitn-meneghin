@@ -1,10 +1,41 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
+import { readFileSync, writeFileSync } from 'fs';
+import * as fs from 'fs';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import path from 'path'
-import { WgConfig, getConfigObjectFromFile, createPeerPairs, checkWgIsInstalled } from 'wireguard-tools'
+import * as readline from 'readline';
+
+import {
+    WgConfig,
+    WgConfigPeer,
+    getConfigObjectFromFile,
+    getConfigStringFromFile,
+    checkWgIsInstalled,
+    generateKeyPair,
+    generateConfigString,
+    parseConfigString,
+    createPeerPairs
+    } from 'wireguard-tools'
+
+    const util = require('util');
+var bodyParser = require('body-parser')
+var jsonParser = bodyParser.json()
+
+const app: Express = express();
+const port = 3005;
+//const { exec } = require('child_process')
+
+const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fun(req, res, next))
+        .catch(next)
+}
 
 const __dirname = "/home/mattia"
 
 //const filePath = path.join(__dirname, '/configs', '/guardline-server.conf')
-const filePath = "/home/mattia/test/guardline-server.conf"
+const filePath = "/home/mattia/test/guardline-server22.conf"
 
 const test = async () => {
   try {
@@ -121,7 +152,16 @@ const test = async () => {
   }
 }
 
-test()
+app.get('/server/', asyncHandler(async (req: Request, res: Response) => {  
+  return res.send( test() )
+}));
+
+
+
+app.listen(port, () => {
+  console.log(`[Server]: I am running at https://localhost:${port}`);
+});
+
 
 
 

@@ -11,6 +11,7 @@ import {
     WgConfig,
     WgConfigPeer,
     getConfigObjectFromFile,
+    getConfigStringFromFile,
     checkWgIsInstalled,
     generateKeyPair,
     generateConfigString,
@@ -31,14 +32,25 @@ const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunct
         .catch(next)
 }
 
+
+
+
 let getServerConfig = async (): Promise<WgConfig> => {
-    let srv_conf_file = await getConfigObjectFromFile({ filePath: "/home/mattia/test/guardline-server.conf"}) //filePath: process.env.SERVER_CONFIG! })
-    let server = new WgConfig({
+    
+    const srv_conf_file2 = await getConfigStringFromFile({ filePath: process.env.SERVER_CONFIG!}) //filePath: process.env.SERVER_CONFIG! })
+    console.log("getConfigStringFromFile", srv_conf_file2)
+
+    const srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG!}) //filePath: process.env.SERVER_CONFIG! })
+    console.log("getConfigObjectFromFile", srv_conf_file)
+
+    let server1 = new WgConfig({
         ...srv_conf_file,
         filePath: process.env.SERVER_CONFIG!
     })
-    await server.generateKeys();
-    return server;
+    console.log("server1\n", server1)
+    await server1.generateKeys();
+    console.log("KEYGEN\n",server1)
+    return server1;
 }
 
 const getAllIps = (__peer: WgConfigPeer): string[] => {         // Return a list whose contains all the busy ips in the range [10.13.13.1 - 10.13.13.255]
@@ -62,22 +74,169 @@ const getAllIps = (__peer: WgConfigPeer): string[] => {         // Return a list
 }
 
 const getAvailableIp = async (): Promise<string> => {
+    console.log( "getAvailableIp" )
     let srv_info = await getServerConfig()              // Parse server file config
-    //const allPeersss = srv_info.peers               // couples of IP-Pubkey of all peers
+    console.log( "srv_info" )
+    const allPeersss = srv_info.peers               // couples of IP-Pubkey of all peers
     //const srv_interface = srv_info.wgInterface      // wg interface settings
-    //console.log("All peers", allPeersss)
+    console.log("All peersss @ 82", allPeersss)
 
     const list = getAllIps(srv_info)
+    console.log("list @ 85", list )
     
-    //console.log( free_ip.toString() )
-
-    let mask = ""
     var ipF = {ip: "10.13.13.8", mask: "/24"}
     console.log(ipF)
-    
-    return list[0]                                  //must return a single free ip in the subnetwork 10.13.13.X
+    var ipG = list[0]
+
+    return ipG                                  //must return a single free ip in the subnetwork 10.13.13.X
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+const createServerFile = async () => {
+  try {
+    // make a new config
+    //const ServerfilePath = "/home//mattia/test/"
+    const ServerfilePath = path.join('/home//mattia/test/', 'wg-server.conf')
+    console.log(ServerfilePath)
+    const server = new WgConfig({
+        wgInterface: {
+            address: ['10.13.13.1']
+        },
+        filePath: ServerfilePath
+    })
+
+    // give the config a name
+    server.wgInterface.name = 'Monokee VPN Server'
+
+    // update some other properties
+    server.wgInterface.listenPort = 41194
+
+    // make a keypair for the config and a pre-shared key
+    const keypair = await server.generateKeys({ preSharedKey: true })
+
+    // these keys will be saved to the config object
+    console.log(keypair.publicKey === server.publicKey) // true
+    console.log(keypair.preSharedKey === server.preSharedKey) // true
+    console.log(keypair.privateKey === server.wgInterface.privateKey) // true
+
+    // write the config to disk
+    await server.writeToFile()
+
+    // read that file into another config object
+    //const thatConfigFromFile = await getConfigObjectFromFile({ filePath : ServerfilePath })
+
+    //************************************************************************************** */
+    //config num_client client pairs
+    const num_peers = 3     //[10.13.13.2  -  10.13.13.4]
+
+    let configs: WgConfig[] = []
+
+    for (let i = 1; i <= 3; i++) {
+        configs.push(new WgConfig({
+            wgInterface: {
+            address: [`10.13.13.${i}`],
+            privateKey: '',
+            name: `Client-${i}`
+            },
+            filePath: path.join('/home/mattia/test/client-configs', `/client-${i}.conf`)
+        }))
+    }
+
+    // get their key pairs
+    await Promise.all(configs.map(x => x.generateKeys()))
+
+    // add them all as peers of each other
+    createPeerPairs(configs.map(x => {
+        return {
+            config: x,
+            peerSettings: ({ thisConfig, peerConfig }) => {
+                const peerAddress = peerConfig.wgInterface.address
+                const peerPresharedKey = peerConfig.preSharedKey
+                return {
+                    allowedIps: peerAddress,
+                    preSharedKey: peerPresharedKey,
+                    name: peerConfig.wgInterface.name,
+                    persistentKeepalive: 15
+                }
+            }
+        }
+    }))
+
+    // write them all to disk
+    await Promise.all(configs.map(x => x.writeToFile()))
+
+
+
+    // ************ 13:10 *************
+    /*
+    for(let i=2; i<num_peers+2; i++ ){
+        const thatConfigFromFile = await getConfigObjectFromFile({ filePath : ServerfilePath })
+        const host = i.toString()
+        const clientX_FilePath = (('/home/mattia/test/client-configs/').concat(host)).concat('client.conf')
+        //const clientX_FilePath = path.join('/home/mattia/test/client-configs/', host, 'client.conf')
+        console.log("print: ", i ,"\n", clientX_FilePath)
+        const clientX = new WgConfig({
+        ...thatConfigFromFile,
+        filePath: clientX_FilePath
+        })
+
+        console.log(server.wgInterface.privateKey === clientX.wgInterface.privateKey)
+        await clientX.generateKeys()
+        console.log(server.publicKey === clientX.publicKey) // true
+        clientX.generateKeys({ overwrite: true })
+        console.log(server.publicKey === clientX.publicKey) // false
+        const clientXAsPeer = clientX.createPeer({
+            allowedIps: [('10.13.13.'.concat(host)).concat('/32\n')]
+        })
+    
+        // you can add a peer to a config like this:
+        server.addPeer(clientXAsPeer)
+        
+
+        // or you make two WgConfigs peers of each other like this:
+        /*createPeerPairs([{
+            config: server,
+            // The peer settings to apply when adding this config as a peer
+            peerSettings: {
+                allowedIps: ['10.13.13.1'],
+                preSharedKey: server.preSharedKey
+            }},{
+            config: clientX,
+            peerSettings: {
+                allowedIps: [('10.13.13.'.concat(host)).concat('32')]
+            }
+        }])
+    }
+    await server.writeToFile()
+    await server.up()
+    await server.restart()
+    await server.down()
+    console.log('files written')
+    */
+  } catch (e) {
+    console.error(e)
+  }
+
+}
+
+
+
+
+
+
+
 
 
 // GET server info {PublicKey, AllowedIPs, Endpoint, PersistentKeepAlive}
@@ -96,9 +255,9 @@ app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
         //Endpoint: srv_endpoint
     };
     //return res.send( srv_data )
-    const free_ip = await getAvailableIp()
+    //const free_ip = await getAvailableIp()
     
-    return res.send( free_ip )                  //10.13.13.8
+    return res.send( createServerFile() )                  //10.13.13.8
 
 }));
 
@@ -139,3 +298,4 @@ function delay(ms: number) {
 app.listen(port, () => {
     console.log(`[Server]: I am running at https://localhost:${port}`);
 });
+
