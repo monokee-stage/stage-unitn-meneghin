@@ -54,7 +54,7 @@ SERVER_CONFIG="/etc/wireguard/wg0.conf"
 
 __________________________________________________________________________________________
 
-On one of the first rows (after import) you can edit the number of ip available
+In one of the first lines (after import) you can edit the number of ip available
 > I'm assuming the usage of:
 - Subnet = 00000000
 - wildcard = 11111111 
@@ -73,14 +73,26 @@ ________________________________________________________________________________
 
 ## Test the API
 I'm using Postman, `sudo snap install postman`
-#### Get all the busy ips in your configuration
-- **GET** request ad http://localhost:3000/server/all_ip/
 
-#### Get a unique free ip in your configuration subnet
-- **GET** request ad http://localhost:3000/server/all_ip/free_ip
+1. #### Get the server wg.conf file
+-**GET** request at http://localhost:3000/server/
 
-#### Generate a client-server configuration that build wgx.conf binary file
+2. #### Get the server interface from wg.conf file
+-**GET** request at http://localhost:3000/server/interface
+
+3. #### Get the server peers from wg.conf file
+-**GET** request at http://localhost:3000/server/peers
+
+4. #### Get all the busy ips in your configuration
+- **GET** request at http://localhost:3000/server/all_ip/
+
+5. #### Get a unique free ip in your configuration subnet
+- **GET** request at http://localhost:3000/server/all_ip/free_ip
+
+6. #### Generate a client-server configuration that build wgx.conf binary file
 - **PUT** request at http://localhost:3000/client/create_file
 
-## Attention
+## Attention ⚠️
 > In order to use the library the wg.conf file MUST be a binary file, so the "touch" mode won't work with the library read-file function
+
+You can find a template of this kind of binary conf file in this repo in the folder **./src/file_conf/**, called **client-1.conf**

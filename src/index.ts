@@ -26,6 +26,32 @@ const app: Express = express();
 const port = 3000;
 const num_max_ip = 255
 
+//==================================================================================
+//================= Functions ======================================================
+
+function syncReadFile(filename: string) {
+    const result = readFileSync(filename);
+    return result;
+}
+
+function syncWriteFile(filename: string, data: any) {
+    writeFileSync(filename, data, { flag: 'w' });
+    const contents = readFileSync(filename);
+    return contents;
+}
+
+function delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getRandomIntInclusive(min : number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
+}
+
+
+
 let getServerConfig = async (): Promise<WgConfig> => {
 
     const srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG!}) //filePath: process.env.SERVER_CONFIG! })
@@ -181,6 +207,9 @@ const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunct
         .catch(next)
 }
 
+
+
+
 //==================================================================================
 //================= API ============================================================
 app.get('/', (req: Request, res: Response) => {
@@ -235,31 +264,6 @@ app.put('/client/create_file/', asyncHandler(async (req: Request, res: Response)
     return res.send( createServerFile() )
 }));
 
-
-//==================================================================================
-//================= Functions ======================================================
-
-
-function syncReadFile(filename: string) {
-    const result = readFileSync(filename);
-    return result;
-}
-
-function syncWriteFile(filename: string, data: any) {
-    writeFileSync(filename, data, { flag: 'w' });
-    const contents = readFileSync(filename);
-    return contents;
-}
-
-function delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function getRandomIntInclusive(min : number, max: number) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
-}
 
 app.listen(port, () => {
     console.log(`[Server]: I am running at https://localhost:${port}`);
