@@ -41,12 +41,12 @@ const getAllIpsUsed = async (): Promise<string[]> => {                          
 
     const srv_info = await getServerConfig()                                    // Parse server file config
     const srv_interface = srv_info.wgInterface                                  // obj contains wg interface settings
-    const allPeers = srv_info.peers                                             // obj contains couples of IP-Pubkey of all peers
-    //console.log("All peers: ", allPeers)
+    const srv_peers = srv_info.peers                                             // obj contains couples of IP-Pubkey of all peers
+    //console.log("All peers: ", srv_peers)
 
     var ip_list : string[] = [ '10.13.13.0' ]                                   // Maybe /32
-    const num_peers = Object.keys(allPeers!).length;
-    const numInter = Object.keys(srv_interface!).length;
+    const num_peers = Object.keys(srv_peers!).length;
+    //const numInter = Object.keys(srv_interface!).length;
     
     // Server ip
     let srv_ipStr = ""
@@ -69,7 +69,7 @@ const getAllIpsUsed = async (): Promise<string[]> => {                          
     for(let i=2; i<num_peers+2; i++ ){                                          // For to build the string to be returned, Avoid 10.13.13.1 and 10.13.13.process.env.NUM_MAX_IP
                                                                  
         for(let j=0; j<num_peers; j++ ){
-            const ipOfPeerChars = Object.values(allPeers![j].allowedIps![0])
+            const ipOfPeerChars = Object.values(srv_peers![j].allowedIps![0])
             let ipOfPeerStr = ""
 
             for(let k=0; k<ipOfPeerChars.length; k++ ){
@@ -188,16 +188,35 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 //==================================================================================
-//================= API - All Ip ===================================================
+//================= API - server config ============================================
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
-    return res.send( 'server' )
+    const srv_config = await getServerConfig()                                      // INPUT: null - OUTPUT: Server config file (obj contains wg settings)
+    return res.send( srv_config )
+}));
+
+//==================================================================================
+//================= API - server interface =========================================
+app.get('/server/interface', asyncHandler(async (req: Request, res: Response) => {
+    console.log("Server interface call")
+    const srv_config = await getServerConfig()                                      // INPUT: null - OUTPUT: Server config file . interface
+    const srv_interface_to_send = srv_config.wgInterface                            // obj contains wg interface settings
+    return res.send( srv_interface_to_send )
+}));
+
+//==================================================================================
+//================= API - server peers =============================================
+app.get('/server/peers', asyncHandler(async (req: Request, res: Response) => {
+    console.log("List peers call")
+    const srv_config = await getServerConfig()                                      // INPUT: null - OUTPUT: Server config file . peers
+    const srv_peers_to_send = srv_config.peers                                      // obj contains wg peers info
+    return res.send( srv_peers_to_send )
 }));
 
 //==================================================================================
 //================= API - All Ip ===================================================
 app.get('/server/all_ip/', asyncHandler(async (req: Request, res: Response) => {
     console.log("List ip call")
-    const ip_list_to_send = await getAllIpsUsed()
+    const ip_list_to_send = await getAllIpsUsed()                                   // INPUT: null - OUTPUT: List with busy IPs (string[])
     return res.send( ip_list_to_send )
 }));
 
@@ -205,7 +224,7 @@ app.get('/server/all_ip/', asyncHandler(async (req: Request, res: Response) => {
 //================= API - Free Ip ==================================================
 app.get('/server/all_ip/free_ip/', asyncHandler(async (req: Request, res: Response) => {
     console.log("Free ip call")
-    const free_ip_to_send = getFreeIp(await getAllIpsUsed())                // Input: lista Ip pieni - Output: un ip random libero
+    const free_ip_to_send = getFreeIp(await getAllIpsUsed())                        // INPUT: List with busy IPs - OUTPUT: a free random IP in the list
     return res.send( free_ip_to_send )
 }));
 
@@ -216,6 +235,9 @@ app.put('/client/create_file/', asyncHandler(async (req: Request, res: Response)
     return res.send( createServerFile() )
 }));
 
+
+//==================================================================================
+//================= Functions ======================================================
 
 
 function syncReadFile(filename: string) {
@@ -238,8 +260,6 @@ function getRandomIntInclusive(min : number, max: number) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
 }
-
-
 
 app.listen(port, () => {
     console.log(`[Server]: I am running at https://localhost:${port}`);
