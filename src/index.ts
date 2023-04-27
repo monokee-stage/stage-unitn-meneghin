@@ -17,14 +17,14 @@ import {
     parseConfigString,
     createPeerPairs
     } from 'wireguard-tools'
-//const { exec } = require('child_process')
+const { exec } = require('child_process')
 const util = require('util');
 var bodyParser = require('body-parser')
 var jsonParser = bodyParser.json()
 
 const app: Express = express();
 const port = 3000;
-const num_max_ip = 255
+const num_max_ip = 10
 
 //==================================================================================
 //================= Functions ======================================================
@@ -50,9 +50,7 @@ function getRandomIntInclusive(min : number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
 }
 
-
-
-let getServerConfig = async (): Promise<WgConfig> => {
+const getServerConfig = async (): Promise<WgConfig> => {
 
     const srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG!}) //filePath: process.env.SERVER_CONFIG! })
     let server1 = new WgConfig({
@@ -63,17 +61,57 @@ let getServerConfig = async (): Promise<WgConfig> => {
     return server1;
 }
 
-const getAllIpsUsed = async (): Promise<string[]> => {                          // Return a list whose contains all the busy ips in the range [10.13.13.1 - 10.13.13.process.env.NUM_MAX_IP]
-
+const getServerInfo = async (): Promise<Object> => {
     const srv_info = await getServerConfig()                                    // Parse server file config
     const srv_interface = srv_info.wgInterface                                  // obj contains wg interface settings
-    const srv_peers = srv_info.peers                                             // obj contains couples of IP-Pubkey of all peers
+
+    // Ip
+    let srv_ipStr = ""
+    const srv_ipChar = Object.values(srv_interface!.address![0])
+    for(let i=0; i<srv_ipChar.length; i++ ){
+        srv_ipStr = srv_ipStr.concat(srv_ipChar[i])
+    }
+    console.log("IP: ", srv_ipStr)
+
+    // Listen Port Not working Rn
+    const srv_listenPort = srv_info.wgInterface!.listenPort!
+    console.log("port", srv_listenPort)
+    
+    // Name
+    let srv_nameStr = ""
+    const srv_name = Object.values(srv_interface!.name!)
+    for(let k=0; k<srv_name.length; k++ ){
+        srv_nameStr = srv_nameStr.concat(srv_name[k])
+    }
+
+    // publicKey
+    let srv_publicKeyStr = ""
+    const srv_pubkey = Object.values(srv_info.publicKey!)
+    for(let k=0; k<srv_pubkey.length; k++ ){
+        srv_publicKeyStr = srv_publicKeyStr.concat(srv_pubkey[k])
+    }
+    console.log(srv_publicKeyStr)
+
+    // Recap
+    const list_srv_info = {
+        port : srv_listenPort,                                                  // SERVER: LISTEN PORT
+        name : srv_nameStr,                                                     // SERVER: NAME
+        ip : srv_ipStr,                                                         // SERVER: IP
+        publicKey: srv_publicKeyStr                                             // SERVER: PUBLICKEY  
+    }                                                                                      
+    return list_srv_info
+}
+
+const getAllIpsUsed = async (server:WgConfig): Promise<string[]> => {           // Return a list whose contains all the busy ips in the range [10.13.13.1 - 10.13.13.process.env.NUM_MAX_IP]
+
+    const srv_interface = server.wgInterface                                    // Obj contains wg interface settings
+    const srv_peers = server.peers                                              // Obj contains couples of IP-Pubkey of all peers
     //console.log("All peers: ", srv_peers)
 
     var ip_list : string[] = [ '10.13.13.0' ]                                   // Maybe /32
     const num_peers = Object.keys(srv_peers!).length;
     //const numInter = Object.keys(srv_interface!).length;
-    
+
     // Server ip
     let srv_ipStr = ""
     const srv_ipChar = Object.values(srv_interface!.address![0])
@@ -81,7 +119,7 @@ const getAllIpsUsed = async (): Promise<string[]> => {                          
     for(let k=0; k<srv_ipChar.length; k++ ){
         srv_ipStr = srv_ipStr.concat(srv_ipChar[k])
     }
-    ip_list[ip_list.length] = srv_ipStr                                         //start write srv ip in the first free position of the list: Should be 0
+    ip_list[ip_list.length] = srv_ipStr                                         // Start write srv ip in the first free position of the list: Should be 0
 
     const srv_status = {
         server_ip : srv_ipStr,
@@ -109,34 +147,34 @@ const getAllIpsUsed = async (): Promise<string[]> => {                          
     return ip_list
 }
 
-function getFreeIp (pool : string []) {
-    try{
+const getFreeIp = async (server : WgConfig): Promise<string> =>  {
+    let ip = ""
+    try{        
         const random : number = getRandomIntInclusive(0,num_max_ip)
-        let ip =  process.env.SERVER_SUBNETWORK!.concat(random.toString())
-        
+        ip =  process.env.SERVER_SUBNETWORK!.concat(random.toString())
+        const pool = await getAllIpsUsed(server)
         if(pool.length < num_max_ip){                
-            do{                                                             // Cicla finchè ip_func non è incluso in pool
+            do{                                                                 // Cicla finchè ip_func non è incluso in pool
                 const randomInFunc : number = getRandomIntInclusive(0,num_max_ip)
-                let ip_func = process.env.SERVER_SUBNETWORK!.concat(randomInFunc.toString())
-                ip = ip_func
-                
+                ip = process.env.SERVER_SUBNETWORK!.concat(randomInFunc.toString())
             }while((pool.includes(ip)))
             console.log("Free IP requested: ", ip)
 
-        } else if (pool.length == num_max_ip){
+        } else if (pool.length == num_max_ip) {
             throw new Error('All ips are busy') 
         }
         return ip
-    } catch(e) {                                                                // ??????????????????
+    } catch(e) {
         console.log(e);
     }
+    return ip
 }
 
 const createServerFile = async () => {
     try {
-        // make a new config
-        //const ServerfilePath = "/home/mattia/test/"
-        const ServerfilePath = path.join('/home/mattia/test/', 'wg-server.conf')
+        // Make a new CONFIG
+        // const ServerfilePath = "/home/mattia/test/"
+        const ServerfilePath = path.join(process.env.SERVER_FOLDER!, 'wg-server1.conf')
         console.log(ServerfilePath)
         const server = new WgConfig({
             wgInterface: {
@@ -155,9 +193,9 @@ const createServerFile = async () => {
         const keypair = await server.generateKeys({ preSharedKey: true })
 
         // these keys will be saved to the config object
-        console.log(keypair.publicKey === server.publicKey) // true
-        console.log(keypair.preSharedKey === server.preSharedKey) // true
-        console.log(keypair.privateKey === server.wgInterface.privateKey) // true
+        //console.log(keypair.publicKey === server.publicKey) // true
+        //console.log(keypair.preSharedKey === server.preSharedKey) // true
+        //console.log(keypair.privateKey === server.wgInterface.privateKey) // true
 
         // write the config to disk
         await server.writeToFile()
@@ -170,7 +208,7 @@ const createServerFile = async () => {
                 privateKey: '',
                 name: `Client-${i}`
                 },
-                filePath: path.join('/home/mattia/test/client-configs', `/client-${i}.conf`)
+                filePath: path.join(process.env.CLIENTS_FOLDER!, `/client-${i}.conf`)
             }))
         }
 
@@ -202,13 +240,95 @@ const createServerFile = async () => {
     }
 }
 
+const createClient = async (server:WgConfig) : Promise<WgConfig> => {
+    const ip = await getFreeIp(server)!
+    const host = ip.substring(9,ip.length)
+    const new_clientPath = path.join(process.env.CLIENTS_FOLDER!, `/client-${host}.conf`)
+    console.log(new_clientPath)
+
+    const new_client = new WgConfig({
+        ...server,
+        filePath: new_clientPath
+    })
+    
+    console.log(server.wgInterface.privateKey === new_client.wgInterface.privateKey)
+    await new_client.generateKeys()
+    console.log("client pub key", new_client.publicKey)
+    console.log("server pub key", server.publicKey)
+
+    // so now the two public keys will be the same
+    console.log(server.publicKey === new_client.publicKey) // true
+    
+    await new_client.generateKeys({ overwrite: true })
+    console.log(server.publicKey === new_client.publicKey) // false
+    console.log("new client public key", new_client.publicKey)
+    console.log("new client private key", new_client.wgInterface.privateKey)
+
+    const new_peer = server.createPeer({
+        allowedIps: [ip],
+    })
+    new_peer.name = `Client-${host}`
+    // const new_client_pubkey = await new_client.generateKeys()
+    console.log ("Inserting Peer: ", new_peer.allowedIps)
+
+    const opt : Boolean = true
+    const merging_settings = {opt : true }
+    console.log(merging_settings.opt)
+    try{
+        server.addPeer(new_peer)
+        await server.writeToFile()
+        console.log("new server config after add:")
+        console.log( (await getServerConfig()).peers )
+    } catch (e) {
+        console.error(e)
+    }
+    return server
+}
+
+const deleteClient = async (pubkey : string): Promise<WgConfig> => {
+    const server = await getServerConfig()
+    console.log("Will be delete the client:")
+    console.log(pubkey)
+    console.log("from the server ", server.wgInterface!.address![0])
+    try{
+        const host = await getHost(pubkey)
+        server.removePeer(pubkey)                                      // INPUT: null - OUTPUT: Server config file . peers
+        await server.writeToFile()
+        console.log("New peers list:")
+        console.log(server.peers)
+
+        exec (`rm -f ${process.env.CLIENTS_FOLDER!}/client-${host}.conf`)
+        console.log(`File ${process.env.CLIENTS_FOLDER!}/client-${host}.conf deleted`)
+    } catch (e) {
+        console.error(e)
+    }
+    return server
+} 
+
+const getHost = async (pubkey : string): Promise<string> => {
+    const peer = (await getServerConfig()).peers
+    let host : string = ""
+    try{
+        for(let i=0; i<peer!.length; i++){
+            let ip = peer![i].allowedIps![0]
+
+            if(pubkey === peer![i].publicKey){
+                host = (ip).substring(9,ip.length)
+                console.log("ip: ", ip, " | host: ", host)
+            }else{
+                //throw new Error(`Not able to find a match between the pubkey provided and the hosts created`)         //why?
+            }
+        }
+    } catch (e) {
+        console.error(e)
+    }
+    return host
+}
+
 const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fun(req, res, next))
         .catch(next)
 }
-
-
-
 
 //==================================================================================
 //================= API ============================================================
@@ -221,6 +341,13 @@ app.get('/', (req: Request, res: Response) => {
 app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
     const srv_config = await getServerConfig()                                      // INPUT: null - OUTPUT: Server config file (obj contains wg settings)
     return res.send( srv_config )
+}));
+
+//==================================================================================
+//================= API - server config ============================================
+app.get('/server/info', asyncHandler(async (req: Request, res: Response) => {
+    const srv_info = await getServerInfo()                                          // INPUT: null - OUTPUT: Server config file (obj contains wg settings)
+    return res.send( srv_info )
 }));
 
 //==================================================================================
@@ -245,7 +372,7 @@ app.get('/server/peers', asyncHandler(async (req: Request, res: Response) => {
 //================= API - All Ip ===================================================
 app.get('/server/all_ip/', asyncHandler(async (req: Request, res: Response) => {
     console.log("List ip call")
-    const ip_list_to_send = await getAllIpsUsed()                                   // INPUT: null - OUTPUT: List with busy IPs (string[])
+    const ip_list_to_send = await getAllIpsUsed(await getServerConfig())            // INPUT: null - OUTPUT: List with busy IPs (string[])
     return res.send( ip_list_to_send )
 }));
 
@@ -253,19 +380,44 @@ app.get('/server/all_ip/', asyncHandler(async (req: Request, res: Response) => {
 //================= API - Free Ip ==================================================
 app.get('/server/all_ip/free_ip/', asyncHandler(async (req: Request, res: Response) => {
     console.log("Free ip call")
-    const free_ip_to_send = getFreeIp(await getAllIpsUsed())                        // INPUT: List with busy IPs - OUTPUT: a free random IP in the list
-    return res.send( free_ip_to_send )
+    const free_ip_to_send = getFreeIp(await getServerConfig())                      // INPUT: List with busy IPs - OUTPUT: a free random IP in the list
+    return res.send( (await free_ip_to_send).toString() )                           // Add to string
 }));
 
+app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
+    const pubkey = `cpva3ncgTZA1+hNjF/uq4ovb1U37xrzooLY+/H0zj3c=`
+    const host = await getHost(pubkey)
 
-// PUT client
+    const varToSend = {
+        host : host
+    }
+
+    return res.send( varToSend )
+}));
+
+//==================================================================================
+//================= API - Create Client ============================================
+app.put('/client/', asyncHandler(async(req: Request, res: Response) => {
+    const server = await getServerConfig()
+    return res.send ((await createClient(server)).peers)
+}))
+
+//==================================================================================
+//================= API - Delete Client ============================================
+app.delete('/client/', asyncHandler(async (req: Request, res: Response) => {
+    //const { publickey } = req.params;                                       // NOT WORKING
+    const publickey = `cpva3ncgTZA1+hNjF/uq4ovb1U37xrzooLY+/H0zj3c=`      // WORKING
+    return res.send ( deleteClient(publickey) )
+}));
+
+//==================================================================================
+//================= API - Create Server Files ======================================
 app.put('/client/create_file/', asyncHandler(async (req: Request, res: Response) => {
     
     return res.send( createServerFile() )
 }));
 
-
 app.listen(port, () => {
-    console.log(`[Server]: I am running at https://localhost:${port}`);
+    console.log(`[Server]: I am running at http://localhost:${port}`);
 });
 

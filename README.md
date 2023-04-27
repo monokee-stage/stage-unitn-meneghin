@@ -50,7 +50,11 @@ SERVER_PUBKEY="RLGHcYlX5tkkkkkkkkkkkkkkkkkkkk1QYERHUz3c="\
 SERVER_PORT="41194"\
 SERVER_NETWORK="10.13.13.0/24"\
 SERVER_INTERFACE="10.13.13.1"\
-SERVER_CONFIG="/etc/wireguard/wg0.conf"
+SERVER_CONFIG="/etc/wireguard/wg0.conf"\
+SERVER_SUBNETWORK="10.13.13."\
+SERVER_INTERFACE="10.13.13.1"\
+SERVER_FOLDER="/etc/wireguard/"\
+CLIENTS_FOLDER="/etc/wireguard/client-configs"
 
 __________________________________________________________________________________________
 
@@ -75,22 +79,22 @@ ________________________________________________________________________________
 I'm using Postman, `sudo snap install postman`
 
 1. #### Get the server wg.conf file
-  -**GET** request at http://localhost:3000/server/
+  **GET** request at http://localhost:3000/server/
 
 2. #### Get the server interface from wg.conf file
-  -**GET** request at http://localhost:3000/server/interface
+  **GET** request at http://localhost:3000/server/interface
 
 3. #### Get the server peers from wg.conf file
-  -**GET** request at http://localhost:3000/server/peers
+  **GET** request at http://localhost:3000/server/peers
 
 4. #### Get all the busy ips in your configuration
-  - **GET** request at http://localhost:3000/server/all_ip/
+  **GET** request at http://localhost:3000/server/all_ip/
 
 5. #### Get a unique free ip in your configuration subnet
-  - **GET** request at http://localhost:3000/server/all_ip/free_ip
+  **GET** request at http://localhost:3000/server/all_ip/free_ip
 
 6. #### Generate a client-server configuration that build wgx.conf binary file
-  - **PUT** request at http://localhost:3000/client/create_file
+  **PUT** request at http://localhost:3000/client/create_file
 
 ## Attention ⚠️
 > In order to use the library the wg.conf file MUST be a binary file, so the "touch" mode won't work with the library read-file function
