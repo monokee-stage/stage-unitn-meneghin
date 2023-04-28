@@ -93,8 +93,11 @@ I'm using Postman, `sudo snap install postman`
 5. #### Get a unique free ip in your configuration subnet
   **GET** request at http://localhost:3000/server/all_ip/free_ip
 
-6. #### Generate a client-server configuration that build wgx.conf binary file
+6. #### Generate a client-server mash configuration that build wgx.conf binary file
   **PUT** request at http://localhost:3000/client/create_file
+
+7. #### Delete client file and from server config
+  **DELETE** request at http://localhost:3000/client/
 
 ## Attention ⚠️
 > In order to use the library the wg.conf file MUST be a binary file, so the "touch" mode won't work with the library read-file function
