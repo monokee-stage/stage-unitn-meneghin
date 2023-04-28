@@ -108,7 +108,7 @@ const getAllIpsUsed = async (server:WgConfig): Promise<string[]> => {           
     const srv_peers = server.peers                                              // Obj contains couples of IP-Pubkey of all peers
     //console.log("All peers: ", srv_peers)
 
-    var ip_list : string[] = [ '10.13.13.0' ]                                   // Maybe /32
+    var ip_list : string[] = [ '10.13.13.255' ]                                   // Maybe /32
     const num_peers = Object.keys(srv_peers!).length;
     //const numInter = Object.keys(srv_interface!).length;
 
@@ -241,48 +241,41 @@ const createServerFile = async () => {
 }
 
 const createClient = async (server:WgConfig) : Promise<WgConfig> => {
+    
     const ip = await getFreeIp(server)!
     const host = ip.substring(9,ip.length)
     const new_clientPath = path.join(process.env.CLIENTS_FOLDER!, `/client-${host}.conf`)
-    console.log(new_clientPath)
+    console.log("client conf file at: " + new_clientPath)
 
     const new_client = new WgConfig({
         ...server,
         filePath: new_clientPath
     })
     
-    console.log(server.wgInterface.privateKey === new_client.wgInterface.privateKey)
     await new_client.generateKeys()
-    console.log("client pub key", new_client.publicKey)
-    console.log("server pub key", server.publicKey)
-
-    // so now the two public keys will be the same
-    console.log(server.publicKey === new_client.publicKey) // true
-    
     await new_client.generateKeys({ overwrite: true })
-    console.log(server.publicKey === new_client.publicKey) // false
-    console.log("new client public key", new_client.publicKey)
-    console.log("new client private key", new_client.wgInterface.privateKey)
-
+    
+    // Write file into server config file
     const new_peer = server.createPeer({
         allowedIps: [ip],
     })
     new_peer.name = `Client-${host}`
-    // const new_client_pubkey = await new_client.generateKeys()
-    console.log ("Inserting Peer: ", new_peer.allowedIps)
 
-    const opt : Boolean = true
+    //const opt : Boolean = true
     const merging_settings = {opt : true }
     console.log(merging_settings.opt)
     try{
         server.addPeer(new_peer)
         await server.writeToFile()
-        console.log("new server config after add:")
+        
+        // Generating config file for client
+        await writeConfClient(new_client, ip)
+        console.log("new server config after add:\n")
         console.log( (await getServerConfig()).peers )
     } catch (e) {
         console.error(e)
     }
-    return server
+    return new_client
 }
 
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
@@ -304,6 +297,26 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
     }
     return server
 } 
+
+const writeConfClient = async (client : WgConfig, ip: string): Promise<void> => {
+    //[Interface]
+    // Privatekey = ...
+    client.wgInterface.name! = ('Client-').concat(ip.substring(9,ip.length))
+    client.wgInterface.address![0] = ip
+    //[Peer]
+    client.peers![0].name = "Monokee"
+    client.peers![0].publicKey = process.env.SERVER_PUBKEY!
+    client.peers![0].endpoint = process.env.SERVER_IP!.concat(`:`, process.env.SERVER_PORT!)
+    client.peers![0].allowedIps![0] = process.env.SERVER_NETWORK!
+    client.peers![0].persistentKeepalive = 15 
+
+    for(let i=1; i<client.peers!.length; i++){
+        client.removePeer(client.peers![i].publicKey!)
+    }
+    
+    await client.writeToFile()              // Generate file /client-configs/client-n.conf
+    console.log("file created")
+}
 
 const getHost = async (pubkey : string): Promise<string> => {
     const peer = (await getServerConfig()).peers
@@ -405,9 +418,12 @@ app.put('/client/', asyncHandler(async(req: Request, res: Response) => {
 //==================================================================================
 //================= API - Delete Client ============================================
 app.delete('/client/', asyncHandler(async (req: Request, res: Response) => {
-    //const { publickey } = req.params;                                       // NOT WORKING
-    const publickey = `cpva3ncgTZA1+hNjF/uq4ovb1U37xrzooLY+/H0zj3c=`      // WORKING
-    return res.send ( deleteClient(publickey) )
+    //const { publickey } = req.params;                                         // NOT WORKING
+    const publickey = `yhpnqSzNeM0MAw5NCXJEbLyhQQKW95+Ruz1QmwVmcjk=`            // WORKING
+    const client = await getHost(publickey)
+    
+    deleteClient(publickey)
+    return res.send ( "Client " + client + " deleted succesfully")
 }));
 
 //==================================================================================

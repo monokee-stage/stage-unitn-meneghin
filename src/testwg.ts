@@ -162,6 +162,33 @@ app.listen(port, () => {
   console.log(`[Server]: I am running at https://localhost:${port}`);
 });
 
+/*
+[Interface]
+PrivateKey = <contents-of-server-privatekey>
+Address = 10.0.0.1/24
+PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+ListenPort = 51820
+
+[Peer]
+PublicKey = <contents-of-client-publickey>
+AllowedIPs = 10.0.0.2/32
+
+IP+dPe99VgPME8mcFG5XaRoCnvmidJU/qcoHXXnaSlc=
+
+{
+    "address": [
+        "10.13.13.1"
+    ],
+    "privateKey": "IP+dPe99VgPME8mcFG5XaRoCnvmidJU/qcoHXXnaSlc=",
+    "name": "Server"
+}
+
+
+*/
+
+
+
 
 
 
