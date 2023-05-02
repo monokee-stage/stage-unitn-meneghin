@@ -254,7 +254,7 @@ const createClient = async (server:WgConfig) : Promise<void> => {
     })
     
     await new_client.generateKeys()
-    await new_client.generateKeys({ overwrite: true })
+    //await new_client.generateKeys({ overwrite: true })
     
     // Write file into server config file
     const new_peer = server.createPeer({
