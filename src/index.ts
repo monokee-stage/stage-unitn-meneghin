@@ -241,8 +241,25 @@ const createServerFile = async () => {
     }
 }
 
-const createClient = async (server:WgConfig) : Promise<void> => {
+const clientRequest = async (server:WgConfig) : Promise<WgConfig> => {          // Client side - 1
+
+    const ip = await getFreeIp(server)!
+    const host = ip.substring(9,ip.length)
+    const new_clientPath = path.join(process.env.CLIENTS_FOLDER!, `/client-${host}.conf`)
+    console.log("client conf file at: " + new_clientPath)
+
+    const new_client = new WgConfig({
+        ...server,
+        filePath: new_clientPath
+    })
     
+    await new_client.generateKeys()
+    return new_client
+}
+
+const createPeer = async (server:WgConfig, pubkey:string) : Promise<string> => {                       // Server side
+    
+    /*
     const ip = await getFreeIp(server)!
     const host = ip.substring(9,ip.length)
     const new_clientPath = path.join(process.env.CLIENTS_FOLDER!, `/client-${host}.conf`)
@@ -255,16 +272,19 @@ const createClient = async (server:WgConfig) : Promise<void> => {
     
     await new_client.generateKeys()
     //await new_client.generateKeys({ overwrite: true })
-    
+    */
+
+    const ip = await getFreeIp(server)!
+    const host = ip.substring(9,ip.length)
     // Write file into server config file
     const new_peer = server.createPeer({
         allowedIps: [ip],
     })
     new_peer.name = `Client-${host}`
 
-    //const opt : Boolean = true
-    const merging_settings = {opt : true }
-    console.log(merging_settings.opt)
+    // const opt : Boolean = true
+    // const merging_settings = {opt : true }
+    // console.log(merging_settings.opt)
     try{
         server.addPeer(new_peer)
         await server.writeToFile()
@@ -274,7 +294,30 @@ const createClient = async (server:WgConfig) : Promise<void> => {
         console.error(e)
     }
     // Generating config file for client
-    await writeConfClient(new_client, ip)
+    // await writeConfClient(new_client, ip)
+    return ip
+}
+
+
+const writeConfClient = async (client : WgConfig, ip: string): Promise<void> => {   // Client side - 2
+    //[Interface]
+    // Privatekey = ...
+    client.wgInterface.listenPort = undefined
+    client.wgInterface.name! = ('Client-').concat(ip.substring(9,ip.length))
+    client.wgInterface.address![0] = ip
+    //[Peer]
+    client.peers![0].name = "Monokee"
+    client.peers![0].publicKey = process.env.SERVER_PUBKEY!
+    client.peers![0].endpoint = process.env.SERVER_IP!.concat(`:`, process.env.SERVER_PORT!)
+    client.peers![0].allowedIps![0] = process.env.SERVER_NETWORK!
+    client.peers![0].persistentKeepalive = 15 
+
+    for(let i=1; i<client.peers!.length; i++){
+        client.removePeer(client.peers![i].publicKey!)
+    }
+    
+    await client.writeToFile()              // Generate file /client-configs/client-n.conf
+    console.log("file created")
 }
 
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
@@ -296,27 +339,6 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
     }
     return server
 } 
-
-const writeConfClient = async (client : WgConfig, ip: string): Promise<void> => {
-    //[Interface]
-    // Privatekey = ...
-    client.wgInterface.listenPort = undefined
-    client.wgInterface.name! = ('Client-').concat(ip.substring(9,ip.length))
-    client.wgInterface.address![0] = ip
-    //[Peer]
-    client.peers![0].name = "Monokee"
-    client.peers![0].publicKey = process.env.SERVER_PUBKEY!
-    client.peers![0].endpoint = process.env.SERVER_IP!.concat(`:`, process.env.SERVER_PORT!)
-    client.peers![0].allowedIps![0] = process.env.SERVER_NETWORK!
-    client.peers![0].persistentKeepalive = 15 
-
-    for(let i=1; i<client.peers!.length; i++){
-        client.removePeer(client.peers![i].publicKey!)
-    }
-    
-    await client.writeToFile()              // Generate file /client-configs/client-n.conf
-    console.log("file created")
-}
 
 const getHost = async (pubkey : string): Promise<string> => {
     const peer = (await getServerConfig()).peers
@@ -416,12 +438,36 @@ app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
 }));
 
 //==================================================================================
-//================= API - Create Client ============================================
-app.put('/client/', asyncHandler(async(req: Request, res: Response) => {
+//================= API - Client Request - 1 =======================================
+app.put('/client/request', asyncHandler(async(req: Request, res: Response) => {
     const server = await getServerConfig()
-    
-    createClient(server)
-    return res.send ("Client Created")
+    console.log("Client Requested")
+    return res.send ((await clientRequest(server)).toJson())
+}))
+
+//==================================================================================
+//================= API - Create peer on server==== =========================
+app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
+    const server = await getServerConfig()
+    console.log("Client Created")
+
+    const client = await clientRequest(server)
+    createPeer(server,client.publicKey!)
+
+    return res.send ("ok")
+}))
+
+//==================================================================================
+//================= API - Write Client wg config file - 2 ==========================
+
+app.put('/client/create', asyncHandler(async(req: Request, res: Response) => {
+    const server = await getServerConfig()
+    console.log("Client Created")
+
+    const client = await clientRequest(server)
+    const ip = await createPeer(server, client.publicKey!)
+
+    return res.send (writeConfClient( client, ip))
 }))
 
 //==================================================================================
