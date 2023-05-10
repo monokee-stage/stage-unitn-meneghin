@@ -284,7 +284,7 @@ const clientRequest = async () : Promise<string> => {                           
     return pubkey
 }
 
-const createPeer = async (server:WgConfig, client_pubkey:string) : Promise<string> => {    // Server side
+const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<string> => {    // Server side
     
     const peers = server.peers!
     for(let i=0; i<peers.length; i++){
@@ -477,9 +477,12 @@ app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
     let data = req.body;
     const client_pubkey = await getHost(data.publickey)
     const new_client = {
-        ip : createPeer(server, client_pubkey)
+        ip : await srvCreatePeer(server, client_pubkey),
+        publickey: client_pubkey
     }
-    return res.send ( new_client.ip )
+
+
+    return res.send ( new_client )
 }))
 
 //==================================================================================
