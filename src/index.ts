@@ -280,6 +280,7 @@ const clientRequest = async () : Promise<string> => {                           
     await new_client.generateKeys()
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
     await new_client.writeToFile()
+    console.log("file", process.env.TEMPLATE_CONFIG!)
     const pubkey = new_client.publicKey! 
     return pubkey
 }
