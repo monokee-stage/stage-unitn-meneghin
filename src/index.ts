@@ -279,7 +279,7 @@ const clientRequest = async () : Promise<string> => {                           
     new_client.wgInterface.name = 'new client request'                              // Edit name of template
     await new_client.generateKeys()
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
-    new_client.writeToFile()
+    await new_client.writeToFile()
     const pubkey = new_client.publicKey! 
     return pubkey
 }
