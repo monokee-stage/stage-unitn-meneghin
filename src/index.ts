@@ -475,7 +475,7 @@ app.put('/request', asyncHandler(async(req: Request, res: Response) => {
 app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
     const server = await getServerConfig()
     let data = req.body;
-    const client_pubkey = await getHost(data.publickey)
+    const client_pubkey = data.publickey
     const new_client = {
         ip : await srvCreatePeer(server, client_pubkey),
         publickey: client_pubkey
@@ -490,7 +490,7 @@ app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
 
 app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     let data = req.body;
-    const ip = await getHost(data.ip)
+    const ip = data.ip
     
     return res.send (await writeConfClient(ip))
 }))
