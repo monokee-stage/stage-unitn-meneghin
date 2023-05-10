@@ -62,6 +62,17 @@ const getServerConfig = async (): Promise<WgConfig> => {
     return server1;
 }
 
+const getTemplateConfig = async (): Promise<WgConfig> => {
+
+    const template_conf_file = await getConfigObjectFromFile({ filePath: process.env.TEMPLATE_CONFIG!})
+    let template = new WgConfig({
+        ...template_conf_file,
+        filePath: process.env.TEMPLATE_CONFIG!
+    })
+    //await template.generateKeys();
+    return template;
+}
+
 const getServerInfo = async (): Promise<serverinfotype> => {
     const srv_info = await getServerConfig()                                    // Parse server file config
     const srv_interface = srv_info.wgInterface                                  // obj contains wg interface settings
@@ -190,7 +201,7 @@ const createServerFile = async () => {
     try {
         // Make a new CONFIG
         // const ServerfilePath = "/home/mattia/test/"
-        const ServerfilePath = path.join(process.env.SERVER_FOLDER!, 'wg0.conf')
+        const ServerfilePath = path.join(process.env.FOLDER!, 'wg0.conf')
         console.log(ServerfilePath)
         const server = new WgConfig({
             wgInterface: {
@@ -215,6 +226,7 @@ const createServerFile = async () => {
 
         // write the config to disk
         await server.writeToFile()
+
 
         let configs: WgConfig[] = []
         for (let i = 1; i <= 3; i++) {
@@ -256,18 +268,18 @@ const createServerFile = async () => {
     }
 }
 
-const clientRequest = async () : Promise<WgConfig> => {                             // Client side - 1
+const clientRequest = async () : Promise<string> => {                               // Client side - 1
 
-    const new_clientPath = path.join(process.env.CLIENTS_FOLDER!, `/client.conf`)
+    const new_clientPath = path.join(process.env.TEMPLATE_CONFIG!, `wg0.conf`)       // Client file
     const new_client = new WgConfig({
-        wgInterface: { address: ['10.13.13.255/32'] },
+        wgInterface: { address: ['10.13.13.255/32'] },                              // IP of template
         filePath: new_clientPath
     })
     
     new_client.wgInterface.name = 'new client request'                              // Edit name of template
     await new_client.generateKeys()
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
-    return new_client
+    return new_client.publicKey!
 }
 
 const createPeer = async (server:WgConfig, client_pubkey:string) : Promise<string> => {    // Server side
@@ -302,7 +314,8 @@ const createPeer = async (server:WgConfig, client_pubkey:string) : Promise<strin
 }
 
 
-const writeConfClient = async (client : WgConfig, ip: string): Promise<void> => {   // Client side - 2
+const writeConfClient = async ( ip: string): Promise<void> => {   // Client side - 2
+    const client = await getTemplateConfig()
     const client_ip = ip
     //[Interface]
     // Privatekey = ...
@@ -329,8 +342,8 @@ const writeConfClient = async (client : WgConfig, ip: string): Promise<void> => 
     }
 
     const host = client_ip.substring(9,ip.length)
-    client.filePath =  path.join(process.env.CLIENTS_FOLDER!, `/client-${host}.conf`)
-    await client.writeToFile()              // Generate file /client-configs/client-n.conf
+    client.filePath =  path.join(process.env.FOLDER!, `/wg0.conf`)
+    await client.writeToFile()
     console.log("file created")
 }
 
@@ -346,8 +359,9 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
         console.log("New peers list:")
         console.log(server.peers)
 
+        /*
         exec (`rm -f ${process.env.CLIENTS_FOLDER!}/client-${host}.conf`)
-        console.log(`File ${process.env.CLIENTS_FOLDER!}/client-${host}.conf deleted`)
+        console.log(`File ${process.env.CLIENTS_FOLDER!}/client-${host}.conf deleted`)*/
     } catch (e) {
         console.error(e)
     }
@@ -448,33 +462,32 @@ app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
 
 //==================================================================================
 //================= API - Client Request - 1 =======================================
-app.put('/client/request', asyncHandler(async(req: Request, res: Response) => {
+app.put('/request', asyncHandler(async(req: Request, res: Response) => {
     const server = await getServerConfig()
     console.log("Client Requested")
-    return res.send ((await clientRequest()).toJson())
+    return res.send (await clientRequest())
 }))
 
 //==================================================================================
-//================= API - Create peer on server==== =========================
+//================= API - Create peer on server==== ================================
 app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
     const server = await getServerConfig()
-    console.log("Client Created")
-    const client_pubkey = (await clientRequest()).publicKey!
-
-    createPeer(server, client_pubkey)
-
-    return res.send ("ok")
+    let data = req.body;
+    const client_pubkey = await getHost(data.publickey)
+    const new_client = {
+        ip : createPeer(server, client_pubkey)
+    }
+    return res.send ( new_client.ip )
 }))
 
 //==================================================================================
 //================= API - Write Client wg config file - 2 ==========================
 
-app.put('/client/create', asyncHandler(async(req: Request, res: Response) => {
-    const server = await getServerConfig()
-    const client = await clientRequest()
-    const ip = await createPeer(server, client.publicKey!)
-
-    return res.send (await writeConfClient( client, ip))
+app.put('/create', asyncHandler(async(req: Request, res: Response) => {
+    let data = req.body;
+    const ip = await getHost(data.ip)
+    
+    return res.send (await writeConfClient(ip))
 }))
 
 //==================================================================================
