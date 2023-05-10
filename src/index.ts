@@ -270,7 +270,7 @@ const createServerFile = async () => {
 
 const clientRequest = async () : Promise<string> => {                               // Client side - 1
 
-    const new_clientPath = path.join(process.env.TEMPLATE_CONFIG!, `wg0.conf`)       // Client file
+    const new_clientPath = path.join(process.env.TEMPLATE_CONFIG!)       // Client file
     const new_client = new WgConfig({
         wgInterface: { address: ['10.13.13.255/32'] },                              // IP of template
         filePath: new_clientPath
