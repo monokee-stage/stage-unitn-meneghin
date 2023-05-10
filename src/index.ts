@@ -53,10 +53,10 @@ function getRandomIntInclusive(min : number, max: number) {
 
 const getServerConfig = async (): Promise<WgConfig> => {
 
-    const srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.SERVER_CONFIG!})
+    const srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.CONFIG!})
     let server1 = new WgConfig({
         ...srv_conf_file,
-        filePath: process.env.SERVER_CONFIG!
+        filePath: process.env.CONFIG!
     })
     await server1.generateKeys();
     return server1;
@@ -236,7 +236,7 @@ const createServerFile = async () => {
                 privateKey: '',
                 name: `Client-${i}`
                 },
-                filePath: path.join(process.env.CLIENTS_FOLDER!, `/client-${i}.conf`)
+                filePath: path.join(process.env.FOLDER!, `/client-${i}.conf`)
             }))
         }
 
@@ -279,7 +279,9 @@ const clientRequest = async () : Promise<string> => {                           
     new_client.wgInterface.name = 'new client request'                              // Edit name of template
     await new_client.generateKeys()
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
-    return new_client.publicKey!
+
+    const pubkey = new_client.publicKey! 
+    return pubkey
 }
 
 const createPeer = async (server:WgConfig, client_pubkey:string) : Promise<string> => {    // Server side
