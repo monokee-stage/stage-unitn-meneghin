@@ -70,6 +70,7 @@ const getTemplateConfig = async (): Promise<WgConfig> => {
         filePath: process.env.TEMPLATE_CONFIG!
     })
     //await template.generateKeys();
+    template.writeToFile()
     return template;
 }
 
