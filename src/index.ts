@@ -319,7 +319,9 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const client = await getTemplateConfig()
     const client_ip = ip
     client.publicKey = pubkey
+    console.log("debug1")
     console.log((await getServerInfo()).port)
+    console.log("debug2")
     console.log("IP: ", ip, "\nPublicKey:", pubkey, "\n")
     //[Interface]
     // Privatekey = ...
@@ -337,7 +339,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     client.peers![0].endpoint = (process.env.SERVER_IP!).concat(`:`, ((await getServerInfo()).port).toString())
     //client.peers![0].allowedIps![0] = (ip.substring(0,9)).concat('0/24')
     client.peers![0].persistentKeepalive = 15 
-
+    console.log("debug3")
     console.log(client)
 
     for(let i=1; i<client.peers!.length; i++){
