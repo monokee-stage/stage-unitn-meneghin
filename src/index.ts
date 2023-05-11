@@ -275,7 +275,6 @@ const clientRequest = async () : Promise<string> => {                           
         wgInterface: { address: ['10.13.13.255/32'] },                              // IP of template
         filePath: new_clientPath
     })
-    await new_client.writeToFile()
     new_client.wgInterface.name = 'new client request'                              // Edit name of template
     await new_client.generateKeys()
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
