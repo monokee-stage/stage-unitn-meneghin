@@ -278,9 +278,9 @@ const clientRequest = async () : Promise<string> => {                           
     new_client.wgInterface.name = 'new client request'                              // Edit name of template
     await new_client.generateKeys()
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
+    const pubkey = new_client.publicKey!
+    new_client.publicKey = pubkey
     await new_client.writeToFile()
-    console.log("file", process.env.TEMPLATE_CONFIG!)
-    const pubkey = new_client.publicKey! 
     return pubkey
 }
 
@@ -315,9 +315,8 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
     return full_Ip
 }
 
-const writeConfClient = async ( ip: string): Promise<void> => {   // Client side - 2
+const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => {   // Client side - 2
     const client = await getTemplateConfig()
-    console.log(client)
     const client_ip = ip
     
     //[Interface]
