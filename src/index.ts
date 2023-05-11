@@ -314,10 +314,10 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
 
 const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => {   // Client side - 2
     const client = await getTemplateConfig()
+    const server = await getServerInfo()
     const client_ip = ip
     client.publicKey = pubkey
-    console.log("debug1")
-    console.log((await getServerInfo()).port)
+    console.log(server.port)
     console.log("debug2")
     console.log("IP: ", ip, "\nPublicKey:", pubkey, "\n")
     //[Interface]
@@ -332,8 +332,8 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     })
     client.addPeer(serverAsPeer)
     client.peers![0].name! = "Monokee"
-    client.peers![0].publicKey = (await getServerInfo()).publicKey
-    client.peers![0].endpoint = (process.env.SERVER_IP!).concat(`:`, ((await getServerInfo()).port).toString())
+    client.peers![0].publicKey = server.publicKey
+    client.peers![0].endpoint = (process.env.SERVER_IP!).concat(`:`, (server.port).toString())
     //client.peers![0].allowedIps![0] = (ip.substring(0,9)).concat('0/24')
     client.peers![0].persistentKeepalive = 15 
     console.log("debug3")
