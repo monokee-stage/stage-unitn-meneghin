@@ -337,7 +337,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     console.log("** 1 **")
     const client = await getTemplateConfig()
     console.log("** 2 **")
-    const server = await getServerInfo()
+    const server = await getServerInfo()                // BUG to do
     console.log("** 3 **")
     const client_ip = ip
     client.publicKey! = pubkey
