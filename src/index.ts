@@ -54,7 +54,8 @@ function getRandomIntInclusive(min : number, max: number) {
 const prepareClientEnv = async ():Promise<void> => {
     const version = await checkWgIsInstalled()
     console.log(version)
-    exec (`mkdir -p ${process.env.FOLDER!}temp`)
+    exec (`mkdir -p ${process.env.FOLDER!}temp/`)
+    exec (`touch ${process.env.FOLDER!}wg0.conf`)
 }
 
 const getServerConfig = async (): Promise<WgConfig> => {
