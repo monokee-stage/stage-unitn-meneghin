@@ -318,6 +318,7 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
 const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => {   // Client side - 2
     const client = await getTemplateConfig()
     const client_ip = ip
+    client.publicKey = pubkey
     console.log("IP: ", ip, "\nPublicKey:", pubkey, "\n")
     //[Interface]
     // Privatekey = ...
