@@ -89,7 +89,7 @@ const getTemplateConfig = async (): Promise<WgConfig> => {
         ...template_conf_file,
         filePath: process.env.TEMPLATE_CONFIG!
     })
-    //await template.generateKeys();
+    await template.generateKeys();
     return template;
 }
 
@@ -334,8 +334,9 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
 }
 
 const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => {   // Client side - 2
-    console.log("***")
+    console.log("** 1 **")
     const client = await getTemplateConfig()
+    console.log("** 2 **")
     const server = await getServerInfo()
     const client_ip = ip
     client.publicKey = pubkey
