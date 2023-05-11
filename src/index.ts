@@ -318,7 +318,7 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
 const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => {   // Client side - 2
     const client = await getTemplateConfig()
     const client_ip = ip
-    
+    console.log("IP: ", ip, "\nPublicKey:", pubkey, "\n")
     //[Interface]
     // Privatekey = ...
     client.wgInterface.listenPort = undefined
@@ -480,8 +480,6 @@ app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
         ip : await srvCreatePeer(server, client_pubkey),
         publickey: client_pubkey
     }
-
-
     return res.send ( new_client )
 }))
 
@@ -492,8 +490,8 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     let data = req.body;
     const ip = data.ip
     const pubkey = data.pubkey
-
-    return res.send (await writeConfClient(ip,pubkey))
+    await writeConfClient(ip,pubkey)
+    return res.send (ip + " : " + pubkey + "File ready in /etc/wireguard/")
 }))
 
 //==================================================================================
