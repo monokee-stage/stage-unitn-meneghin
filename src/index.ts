@@ -406,21 +406,21 @@ app.get('/', (req: Request, res: Response) => {
 
 //==================================================================================
 //================= API - server config ============================================
-app.get('/server/', asyncHandler(async (req: Request, res: Response) => {
+app.get('/config', asyncHandler(async (req: Request, res: Response) => {
     const srv_config = await getServerConfig()
     return res.send( srv_config )
 }));
 
 //==================================================================================
 //================= API - server config ============================================
-app.get('/server/info', asyncHandler(async (req: Request, res: Response) => {
+app.get('/info', asyncHandler(async (req: Request, res: Response) => {
     const srv_info = await getServerInfo()
     return res.send( srv_info )
 }));
 
 //==================================================================================
 //================= API - server interface =========================================
-app.get('/server/interface', asyncHandler(async (req: Request, res: Response) => {  // Temporary bc returns private key
+app.get('/interface', asyncHandler(async (req: Request, res: Response) => {  // Temporary bc returns private key
     const srv_config = await getServerConfig()                                      // INPUT: null - OUTPUT: Server config file . interface
     const srv_interface_to_send = srv_config.wgInterface                            // obj contains wg interface settings
     return res.send( srv_interface_to_send )
@@ -428,21 +428,21 @@ app.get('/server/interface', asyncHandler(async (req: Request, res: Response) =>
 
 //==================================================================================
 //================= API - server peers =============================================
-app.get('/server/peers', asyncHandler(async (req: Request, res: Response) => {
+app.get('/peers', asyncHandler(async (req: Request, res: Response) => {
     const srv_peers = (await getServerConfig()).peers                               // Obj contains wg peers info 
     return res.send( srv_peers )
 }));
 
 //==================================================================================
 //================= API - All Ip ===================================================
-app.get('/server/all_ip/', asyncHandler(async (req: Request, res: Response) => {
+app.get('/all_ip/', asyncHandler(async (req: Request, res: Response) => {
     const ip_list_to_send = await getAllIpsUsed(await getServerConfig())            // List with busy IPs (string[])
     return res.send( ip_list_to_send )
 }));
 
 //==================================================================================
 //================= API - Free Ip ==================================================
-app.get('/server/all_ip/free_ip/', asyncHandler(async (req: Request, res: Response) => {
+app.get('/free_ip', asyncHandler(async (req: Request, res: Response) => {
     const free_ip_to_send = getFreeIp(await getServerConfig())                      // String containing a free random IP in the server busy-ip list
     return res.send( (await free_ip_to_send).toString() )
 }));
@@ -498,7 +498,7 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
 
 //==================================================================================
 //================= API - Delete Client ============================================
-app.delete('/client/', asyncHandler(async (req: Request, res: Response) => {
+app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     let data = req.body;
     const client = await getHost(data.publickey)
     if (client != "empty" ){
