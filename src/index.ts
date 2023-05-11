@@ -336,9 +336,6 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
 const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => {   // Client side - 2
     console.log("** 1 **")
     const client = await getTemplateConfig()
-    console.log("** 2 **")
-    const server = await getServerInfo()                // BUG to do
-    console.log("** 3 **")
     const client_ip = ip
     client.publicKey! = pubkey
     console.log("IP: ", ip, "\nPublicKey:", pubkey, "\n")
@@ -354,9 +351,9 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     })
     client.addPeer(serverAsPeer)
     client.peers![0].name! = "Monokee"
-    client.peers![0].publicKey = server.publicKey
-    client.peers![0].endpoint = (process.env.SERVER_IP!).concat(`:`)                //.concat(`:`, (server.port).toString())
-    //client.peers![0].allowedIps![0] = (ip.substring(0,9)).concat('0/24'
+    client.peers![0].publicKey = process.env.PUBLICKEY!
+    client.peers![0].endpoint = (process.env.SERVER_IP!).concat(`:`, (process.env.PORT!))
+    //client.peers![0].allowedIps![0] = (ip.substring(0,9)).concat('0/24')
     client.peers![0].persistentKeepalive = 15 
     console.log("debug3")
     console.log(client)
@@ -524,7 +521,7 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     const pubkey : string = data.publickey
     await writeConfClient(ip,pubkey)
     await startInterface()
-    return res.send (ip + " : " + pubkey + "File ready in /etc/wireguard/")
+    return res.send ("File ready in /etc/wireguard/")
 }))
 
 //==================================================================================
