@@ -491,8 +491,9 @@ app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
 app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     let data = req.body;
     const ip = data.ip
-    
-    return res.send (await writeConfClient(ip))
+    const pubkey = data.pubkey
+
+    return res.send (await writeConfClient(ip,pubkey))
 }))
 
 //==================================================================================
