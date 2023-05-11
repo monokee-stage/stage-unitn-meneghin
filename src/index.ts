@@ -317,7 +317,9 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
 
 const writeConfClient = async ( ip: string): Promise<void> => {   // Client side - 2
     const client = await getTemplateConfig()
+    console.log(client)
     const client_ip = ip
+    
     //[Interface]
     // Privatekey = ...
     client.wgInterface.listenPort = undefined
