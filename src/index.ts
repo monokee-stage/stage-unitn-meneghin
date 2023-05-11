@@ -503,7 +503,7 @@ app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     host = host.substring(0,(host.length-3))
     if (host != "empty" ){
         deleteClient(data.publickey)
-        return res.send ( "Client " + host + " deleted succesfully")
+        return res.send ( "Client " + host + " deleted succesfully " + host.length)
     }else{
         return res.send ("No client existing with this publickey")
     }
