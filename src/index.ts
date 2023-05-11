@@ -89,7 +89,7 @@ const getTemplateConfig = async (): Promise<WgConfig> => {
         ...template_conf_file,
         filePath: process.env.TEMPLATE_CONFIG!
     })
-    await template.generateKeys();
+    await template.generateKeys();          //Forse eliminare
     return template;
 }
 
@@ -338,8 +338,9 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const client = await getTemplateConfig()
     console.log("** 2 **")
     const server = await getServerInfo()
+    console.log("** 3 **")
     const client_ip = ip
-    client.publicKey = pubkey
+    client.publicKey! = pubkey
     console.log("IP: ", ip, "\nPublicKey:", pubkey, "\n")
     //[Interface]
     // Privatekey = ...
