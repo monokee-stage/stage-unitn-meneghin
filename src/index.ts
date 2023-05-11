@@ -275,7 +275,7 @@ const clientRequest = async () : Promise<string> => {                           
         wgInterface: { address: ['10.13.13.255/32'] },                              // IP of template
         filePath: new_clientPath
     })
-    
+    await new_client.writeToFile()
     new_client.wgInterface.name = 'new client request'                              // Edit name of template
     await new_client.generateKeys()
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
@@ -313,9 +313,8 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
     } catch (e) {
         console.error(e)
     }
-    return ip
+    return full_Ip
 }
-
 
 const writeConfClient = async ( ip: string): Promise<void> => {   // Client side - 2
     const client = await getTemplateConfig()
