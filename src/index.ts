@@ -319,13 +319,13 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const client = await getTemplateConfig()
     const client_ip = ip
     client.publicKey = pubkey
+    console.log((process.env.SERVER_IP!).concat(`:`, ((await getServerInfo()).port).toString()))
     console.log("IP: ", ip, "\nPublicKey:", pubkey, "\n")
     //[Interface]
     // Privatekey = ...
     client.wgInterface.listenPort = undefined
     client.wgInterface.name! = ('Client-').concat(ip.substring(9,ip.length))
     client.wgInterface.address![0] = ip.concat('/24')
-    console.log(client)
     //[Peer]
     const srv_ip = (ip.substring(0,9)).concat('0/24')
     const serverAsPeer = client.createPeer({
@@ -347,12 +347,11 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const host = client_ip.substring(9,ip.length)
     client.filePath =  path.join(process.env.FOLDER!, `/wg0.conf`)
     await client.writeToFile()
-    console.log("file created")
 }
 
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
     const server = await getServerConfig()
-    console.log("Will be delete the client:")
+    console.log("Will be deleted the client:")
     console.log(pubkey)
     console.log("from the server ", server.wgInterface!.address![0])
     try{
