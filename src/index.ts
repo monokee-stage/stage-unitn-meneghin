@@ -466,7 +466,7 @@ app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
 //================= API - Client Request - 1 =======================================
 app.put('/request', asyncHandler(async(req: Request, res: Response) => {
     const server = await getServerConfig()
-    console.log("Client Requested")
+    console.log("Client Request sent correctly")
     return res.send (await clientRequest())
 }))
 
