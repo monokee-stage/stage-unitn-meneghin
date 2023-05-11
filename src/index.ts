@@ -137,7 +137,7 @@ const getAllIpsUsed = async (server:WgConfig): Promise<string[]> => {           
     const srv_interface = server.wgInterface                                    // Obj contains wg interface settings
     const srv_peers = server.peers                                              // Obj contains couples of IP-Pubkey of all peers
 
-    var ip_list : string[] = [ '10.13.13.255/32' ]                                   // Maybe /32
+    var ip_list : string[] = [ '10.13.13.255/32', '10.13.13.1/32' ]                                   // Maybe /32
     const num_peers = Object.keys(srv_peers!).length;
     //const numInter = Object.keys(srv_interface!).length;
 
@@ -489,7 +489,7 @@ app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
 app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     let data = req.body;
     const ip : string = data.ip
-    const pubkey : string = data.pubkey
+    const pubkey : string = data.publickey
     await writeConfClient(ip,pubkey)
     return res.send (ip + " : " + pubkey + "File ready in /etc/wireguard/")
 }))
