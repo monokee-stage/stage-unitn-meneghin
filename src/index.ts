@@ -58,7 +58,7 @@ const prepareClientEnv = async ():Promise<void> => {
     exec (`touch ${process.env.FOLDER!}wg0.conf`)
 }
 
-const getServerConfig = async (): Promise<WgConfig> => {
+const getConfig = async (): Promise<WgConfig> => {
 
     const srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.CONFIG!})
     let server1 = new WgConfig({
@@ -90,7 +90,7 @@ type serverinfotype = {
 }
 
 const getServerInfo = async (): Promise<serverinfotype> => {
-    const srv_info = await getServerConfig()                                    // Parse server file config
+    const srv_info = await getConfig()                                    // Parse server file config
     const srv_interface = srv_info.wgInterface                                  // obj contains wg interface settings
 
     // WgInterface
@@ -309,14 +309,11 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
     })
     new_peer.name = `Client-${host}`
     new_peer.publicKey = client_pubkey
-    // const opt : Boolean = true
-    // const merging_settings = {opt : true }
-    // console.log(merging_settings.opt)
     try{
         server.addPeer(new_peer)
         await server.writeToFile()
         console.log("new server config after add:\n")
-        console.log( (await getServerConfig()).peers )
+        console.log( (await getConfig()).peers )
     } catch (e) {
         console.error(e)
     }
@@ -356,13 +353,18 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     client.filePath =  path.join(process.env.FOLDER!, `/wg0.conf`)
     await client.writeToFile()
 
-    //delete temp
+    //delete temp folder
     const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)     //  /etc/wireguard/temp/
     exec (`rm -rf ${folder_to_rm}`)
 }
 
+const startInterface = async (): Promise<void> => {
+    const wg_interface = await getConfig()
+    await wg_interface.up()
+}
+
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
-    const server = await getServerConfig()
+    const server = await getConfig()
     console.log("Will be deleted the client:")
     console.log(pubkey)
     console.log("from the server ", server.wgInterface!.address![0])
@@ -379,7 +381,7 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
 } 
 
 const getHost = async (pubkey : string): Promise<string> => {
-    const peer = (await getServerConfig()).peers
+    const peer = (await getConfig()).peers
     let host : string = "empty"
     try{
         for(let i=0; i<peer!.length; i++){
@@ -415,7 +417,7 @@ app.get('/', (req: Request, res: Response) => {
 //==================================================================================
 //================= API - server config ============================================
 app.get('/config', asyncHandler(async (req: Request, res: Response) => {
-    const srv_config = await getServerConfig()
+    const srv_config = await getConfig()
     return res.send( srv_config )
 }));
 
@@ -429,7 +431,7 @@ app.get('/info', asyncHandler(async (req: Request, res: Response) => {
 //==================================================================================
 //================= API - server interface =========================================
 app.get('/interface', asyncHandler(async (req: Request, res: Response) => {  // Temporary bc returns private key
-    const srv_config = await getServerConfig()                                      // INPUT: null - OUTPUT: Server config file . interface
+    const srv_config = await getConfig()                                      // INPUT: null - OUTPUT: Server config file . interface
     const srv_interface_to_send = srv_config.wgInterface                            // obj contains wg interface settings
     return res.send( srv_interface_to_send )
 }));
@@ -437,21 +439,21 @@ app.get('/interface', asyncHandler(async (req: Request, res: Response) => {  // 
 //==================================================================================
 //================= API - server peers =============================================
 app.get('/peers', asyncHandler(async (req: Request, res: Response) => {
-    const srv_peers = (await getServerConfig()).peers                               // Obj contains wg peers info 
+    const srv_peers = (await getConfig()).peers                               // Obj contains wg peers info 
     return res.send( srv_peers )
 }));
 
 //==================================================================================
 //================= API - All Ip ===================================================
 app.get('/all_ip/', asyncHandler(async (req: Request, res: Response) => {
-    const ip_list_to_send = await getAllIpsUsed(await getServerConfig())            // List with busy IPs (string[])
+    const ip_list_to_send = await getAllIpsUsed(await getConfig())            // List with busy IPs (string[])
     return res.send( ip_list_to_send )
 }));
 
 //==================================================================================
 //================= API - Free Ip ==================================================
 app.get('/free_ip', asyncHandler(async (req: Request, res: Response) => {
-    const free_ip_to_send = getFreeIp(await getServerConfig())                      // String containing a free random IP in the server busy-ip list
+    const free_ip_to_send = getFreeIp(await getConfig())                      // String containing a free random IP in the server busy-ip list
     return res.send( (await free_ip_to_send).toString() )
 }));
 
@@ -475,13 +477,18 @@ app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
 app.put('/request', asyncHandler(async(req: Request, res: Response) => {
     await prepareClientEnv()
     console.log("Client Request sent correctly")
-    return res.send (await clientRequest())
+
+    const pubkey = {
+        publickey : await clientRequest()
+    }
+
+    return res.send (pubkey)
 }))
 
 //==================================================================================
 //================= API - Create peer on server==== ================================
 app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
-    const server = await getServerConfig()
+    const server = await getConfig()
     let data = req.body;
     const client_pubkey = data.publickey
     const ip_returned = await srvCreatePeer(server, client_pubkey)
