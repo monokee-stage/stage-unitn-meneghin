@@ -73,6 +73,15 @@ const getTemplateConfig = async (): Promise<WgConfig> => {
     return template;
 }
 
+type serverinfotype = {
+    ip: string;
+    port : number;
+    name : string;
+    filePath : string;
+    peers : WgConfigPeer[];
+    publicKey: string;
+}
+
 const getServerInfo = async (): Promise<serverinfotype> => {
     const srv_info = await getServerConfig()                                    // Parse server file config
     const srv_interface = srv_info.wgInterface                                  // obj contains wg interface settings
@@ -84,11 +93,9 @@ const getServerInfo = async (): Promise<serverinfotype> => {
     for(let i=0; i<srv_ipChar.length; i++ ){
         srv_ipStr = srv_ipStr.concat(srv_ipChar[i])
     }
-    console.log("IP: ", srv_ipStr)
 
     // Listen Port Not working Rn
     const srv_listenPort = srv_info.wgInterface!.listenPort!
-    console.log("Port:", srv_listenPort)
     
     // Name
     let srv_nameStr = ""
@@ -103,7 +110,6 @@ const getServerInfo = async (): Promise<serverinfotype> => {
     for(let k=0; k<srv_pubkey.length; k++ ){
         srv_publicKeyStr = srv_publicKeyStr.concat(srv_pubkey[k])
     }
-    console.log(srv_publicKeyStr)
 
     //filePath
     const srv_filePath = srv_info.filePath
@@ -121,15 +127,6 @@ const getServerInfo = async (): Promise<serverinfotype> => {
         publicKey: srv_publicKeyStr                                             // SERVER: PUBLICKEY  
     }                                                                                      
     return list_srv_info
-}
-
-type serverinfotype = {
-    ip: string;
-    port : number;
-    name : string;
-    filePath : string;
-    peers : WgConfigPeer[];
-    publicKey: string;
 }
 
 const getAllIpsUsed = async (server:WgConfig): Promise<string[]> => {           // Return a list whose contains all the busy ips in the range [10.13.13.1 - 10.13.13.num_max_ip (var @ r: 27)
