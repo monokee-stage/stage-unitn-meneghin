@@ -319,7 +319,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const client = await getTemplateConfig()
     const client_ip = ip
     client.publicKey = pubkey
-    console.log((process.env.SERVER_IP!).concat(`:`, ((await getServerInfo()).port).toString()))
+    console.log((await getServerInfo()).port)
     console.log("IP: ", ip, "\nPublicKey:", pubkey, "\n")
     //[Interface]
     // Privatekey = ...
@@ -499,11 +499,11 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
 //================= API - Delete Client ============================================
 app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     let data = req.body;
-    let client = await getHost(data.publickey)
-    client = client.substring(0,(client.length-3))
-    if (client != "empty" ){
+    let host = await getHost(data.publickey)
+    host = host.substring(0,(host.length-3))
+    if (host != "empty" ){
         deleteClient(data.publickey)
-        return res.send ( "Client " + client + " deleted succesfully")
+        return res.send ( "Client " + host + " deleted succesfully")
     }else{
         return res.send ("No client existing with this publickey")
     }
