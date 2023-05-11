@@ -270,7 +270,7 @@ const createServerFile = async () => {
 
 const clientRequest = async () : Promise<string> => {                               // Client side - 1
 
-    const new_clientPath = path.join(process.env.TEMPLATE_CONFIG!)       // Client file
+    const new_clientPath = path.join(process.env.TEMPLATE_CONFIG!)                  // Client file
     const new_client = new WgConfig({
         wgInterface: { address: ['10.13.13.255/32'] },                              // IP of template
         filePath: new_clientPath
@@ -279,7 +279,7 @@ const clientRequest = async () : Promise<string> => {                           
     await new_client.generateKeys()
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
     const pubkey = new_client.publicKey!
-    new_client.publicKey = pubkey
+    //new_client.publicKey = pubkey
     await new_client.writeToFile()
     return pubkey
 }
@@ -488,8 +488,8 @@ app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
 
 app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     let data = req.body;
-    const ip = data.ip
-    const pubkey = data.pubkey
+    const ip : string = data.ip
+    const pubkey : string = data.pubkey
     await writeConfClient(ip,pubkey)
     return res.send (ip + " : " + pubkey + "File ready in /etc/wireguard/")
 }))
