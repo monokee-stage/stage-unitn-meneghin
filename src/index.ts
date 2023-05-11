@@ -333,8 +333,8 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     client.addPeer(serverAsPeer)
     client.peers![0].name! = "Monokee"
     client.peers![0].publicKey = server.publicKey
-    client.peers![0].endpoint = (process.env.SERVER_IP!).concat(`:`, (server.port).toString())
-    //client.peers![0].allowedIps![0] = (ip.substring(0,9)).concat('0/24')
+    client.peers![0].endpoint = ((process.env.SERVER_IP!).concat(`:`)).concat((server.port).toString())   //.concat(`:`, (server.port).toString())
+    //client.peers![0].allowedIps![0] = (ip.substring(0,9)).concat('0/24'
     client.peers![0].persistentKeepalive = 15 
     console.log("debug3")
     console.log(client)
