@@ -321,6 +321,7 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
 }
 
 const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => {   // Client side - 2
+    console.log("***")
     const client = await getTemplateConfig()
     const server = await getServerInfo()
     const client_ip = ip
@@ -486,7 +487,7 @@ app.put('/request', asyncHandler(async(req: Request, res: Response) => {
 }))
 
 //==================================================================================
-//================= API - Create peer on server==== ================================
+//================= API - Create peer on server ====================================
 app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
     const server = await getConfig()
     let data = req.body;
@@ -507,6 +508,7 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     const ip : string = data.ip
     const pubkey : string = data.publickey
     await writeConfClient(ip,pubkey)
+    await startInterface()
     return res.send (ip + " : " + pubkey + "File ready in /etc/wireguard/")
 }))
 
@@ -518,11 +520,10 @@ app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     host = host.substring(0,(host.length-3))
     if (host != "empty" ){
         deleteClient(data.publickey)
-        return res.send ( "Client " + host + " deleted succesfully " + host.length)
+        return res.send ( "Client " + host + " deleted succesfully ")
     }else{
         return res.send ("No client existing with this publickey")
     }
-    
 }));
 
 //==================================================================================
