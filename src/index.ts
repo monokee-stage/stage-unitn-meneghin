@@ -51,11 +51,24 @@ function getRandomIntInclusive(min : number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
 }
 
+const createTempFile = async() : Promise<void> => {
+
+    const filePath = process.env.TEMPLATE_CONFIG!
+    const temp = new WgConfig({
+        wgInterface: { address: ['10.13.13.255/32'] },
+        filePath
+    })
+    temp.wgInterface.name = 'temp'
+    temp.generateKeys()
+    temp.writeToFile()
+}
+
 const prepareClientEnv = async ():Promise<void> => {
     const version = await checkWgIsInstalled()
     console.log(version)
     exec (`mkdir -p ${process.env.FOLDER!}temp/`)
     exec (`touch ${process.env.FOLDER!}wg0.conf`)
+    createTempFile()
 }
 
 const getConfig = async (): Promise<WgConfig> => {
