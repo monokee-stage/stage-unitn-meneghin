@@ -95,8 +95,8 @@ const getServerInfo = async (): Promise<serverinfotype> => {
     }
 
     // Listen Port Not working Rn
-    const srv_listenPort = srv_info.wgInterface!.listenPort!
-    
+    const srv_listenPort = srv_info.wgInterface.listenPort!
+    console.log(srv_listenPort)
     // Name
     let srv_nameStr = ""
     const srv_name = Object.values(srv_interface!.name!)
@@ -317,8 +317,6 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const server = await getServerInfo()
     const client_ip = ip
     client.publicKey = pubkey
-    console.log(server.port)
-    console.log("debug2")
     console.log("IP: ", ip, "\nPublicKey:", pubkey, "\n")
     //[Interface]
     // Privatekey = ...
