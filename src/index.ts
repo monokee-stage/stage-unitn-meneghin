@@ -51,6 +51,12 @@ function getRandomIntInclusive(min : number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
 }
 
+const prepareClientEnv = async ():Promise<void> => {
+    const version = await checkWgIsInstalled()
+    console.log(version)
+    exec (`mkdir -p ${process.env.FOLDER!}temp`)
+}
+
 const getServerConfig = async (): Promise<WgConfig> => {
 
     const srv_conf_file = await getConfigObjectFromFile({ filePath: process.env.CONFIG!})
@@ -275,7 +281,11 @@ const clientRequest = async () : Promise<string> => {                           
     new_client.wgInterface.name = 'new client request'                              // Edit name of template
     await new_client.generateKeys()
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
+    
+    const privkey = new_client.wgInterface.privateKey!
+    exec(`echo "${privkey}" >> ${process.env.FOLDER!}/privatekey`)
     const pubkey = new_client.publicKey!
+    exec(`echo "${pubkey}" >> ${process.env.FOLDER!}/publickey`)
     //new_client.publicKey = pubkey
     await new_client.writeToFile()
     return pubkey
@@ -344,6 +354,10 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const host = client_ip.substring(9,ip.length)
     client.filePath =  path.join(process.env.FOLDER!, `/wg0.conf`)
     await client.writeToFile()
+
+    //delete temp
+    const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)     //  /etc/wireguard/temp/
+    exec (`rm -rf ${folder_to_rm}`)
 }
 
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
@@ -357,10 +371,6 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
         await server.writeToFile()
         console.log("New peers list:")
         console.log(server.peers)
-
-        /*
-        exec (`rm -f ${process.env.CLIENTS_FOLDER!}/client-${host}.conf`)
-        console.log(`File ${process.env.CLIENTS_FOLDER!}/client-${host}.conf deleted`)*/
     } catch (e) {
         console.error(e)
     }
@@ -462,7 +472,7 @@ app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
 //==================================================================================
 //================= API - Client Request - 1 =======================================
 app.put('/request', asyncHandler(async(req: Request, res: Response) => {
-    const server = await getServerConfig()
+    await prepareClientEnv()
     console.log("Client Request sent correctly")
     return res.send (await clientRequest())
 }))
