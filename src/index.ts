@@ -297,9 +297,9 @@ const clientRequest = async () : Promise<string> => {                           
     await new_client.generateKeys({ overwrite: true })                              // Edit keys of template
     
     const privkey = new_client.wgInterface.privateKey!
-    exec(`echo "${privkey}" >> ${process.env.FOLDER!}/privatekey`)
+    exec(`echo "${privkey}" > ${process.env.FOLDER!}/privatekey`)
     const pubkey = new_client.publicKey!
-    exec(`echo "${pubkey}" >> ${process.env.FOLDER!}/publickey`)
+    exec(`echo "${pubkey}" > ${process.env.FOLDER!}/publickey`)
     //new_client.publicKey = pubkey
     await new_client.writeToFile()
     return pubkey
@@ -529,7 +529,7 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
 app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     let data = req.body;
     let host = await getHost(data.publickey)
-    host = host.substring(0,(host.length-3))
+    //host = host.substring(0,(host.length-3))
     if (host != "empty" ){
         deleteClient(data.publickey)
         return res.send ( "Client " + host + " deleted succesfully ")
