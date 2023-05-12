@@ -364,6 +364,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     await client.writeToFile()
     // Interface UP
     // await client.up()
+    console.log("starting the interface wg0")
     exec(`systemctl start wg-quick@wg0`)
     exec(`systemctl status wg-quick@wg0`)
     // Delete temp folder
@@ -371,7 +372,8 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     exec(`rm -rf ${folder_to_rm}`)
     // Ping the server
     const server_ip = (await getServerInfo()).ip
-    exec(`ping -c 4 ${server_ip}`)
+    //exec(`ping -c 4 ${server_ip}`)
+    exec(`ping -c 4 10.13.13.1`)
 }
 
 const startInterface = async (): Promise<void> => {
