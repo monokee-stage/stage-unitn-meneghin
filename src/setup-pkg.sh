@@ -18,13 +18,15 @@ npm i --save-dev
 
 touch ~/stage-unitn-meneghin/.env
 
+echo 'CLIENT_URL="stage-meneghin-client.intranet.athesys.it"' >> ~/stage-unitn-meneghin/.env
 echo 'SERVER_URL="stage-meneghin1.intranet.athesys.it"' >> ~/stage-unitn-meneghin/.env
 echo 'SERVER_IP="10.111.0.44"' >> ~/stage-unitn-meneghin/.env
-echo 'SERVER_PUBKEY="RLGHcYlX5toih+S/xpE3yqv23yiaey/6u1QYERHUz3c=="' >> ~/stage-unitn-meneghin/.env
-echo 'SERVER_PORT="41194"' >> ~/stage-unitn-meneghin/.env
-echo 'SERVER_NETWORK="10.13.13.0/24"' >> ~/stage-unitn-meneghin/.env
-echo 'SERVER_INTERFACE="10.13.13.1"' >> ~/stage-unitn-meneghin/.env
-echo 'SERVER_CONFIG="/etc/wireguard/wg0.conf"' >> ~/stage-unitn-meneghin/.env
+echo 'PUBLICKEY="e5zEi/9jKKy9/KCoPqZ1RVLm5qb3uIefPUpKoVU1vmY="' >> ~/stage-unitn-meneghin/.env
+echo 'PORT="41194"' >> ~/stage-unitn-meneghin/.env
+echo 'FOLDER="/etc/wireguard/"' >> ~/stage-unitn-meneghin/.env
+echo 'TEMPLATE_CONFIG="/etc/wireguard/temp/wg0-temp.conf"' >> ~/stage-unitn-meneghin/.env
+echo 'CONFIG="/etc/wireguard/wg0.conf"' >> ~/stage-unitn-meneghin/.env
+
 
 yarn build
 yarn start

@@ -334,7 +334,6 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
 }
 
 const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => {   // Client side - 2
-    console.log("** 1 **")
     const client = await getTemplateConfig()
     const client_ip = ip
     client.publicKey! = pubkey
@@ -355,8 +354,6 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     client.peers![0].endpoint = (process.env.SERVER_IP!).concat(`:`, (process.env.PORT!))
     //client.peers![0].allowedIps![0] = (ip.substring(0,9)).concat('0/24')
     client.peers![0].persistentKeepalive = 15 
-    console.log("debug3")
-    console.log(client)
 
     for(let i=1; i<client.peers!.length; i++){
         client.removePeer(client.peers![i].publicKey!)
@@ -366,9 +363,14 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     client.filePath =  path.join(process.env.FOLDER!, `/wg0.conf`)
     await client.writeToFile()
 
+    await client.up()
+
     //delete temp folder
     const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)     //  /etc/wireguard/temp/
-    exec (`rm -rf ${folder_to_rm}`)
+    exec(`rm -rf ${folder_to_rm}`)
+    const server_ip = (await getServerInfo()).ip
+    exec(`ping -c 4 ${server_ip}`)
+
 }
 
 const startInterface = async (): Promise<void> => {
@@ -520,7 +522,7 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     const ip : string = data.ip
     const pubkey : string = data.publickey
     await writeConfClient(ip,pubkey)
-    await startInterface()
+    //await startInterface()
     return res.send ("File ready in /etc/wireguard/")
 }))
 
