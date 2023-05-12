@@ -363,7 +363,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     client.filePath =  path.join(process.env.FOLDER!, `/wg0.conf`)
     await client.writeToFile()
     // Interface UP
-    await client.up()
+    // await client.up()
     exec(`systemctl start wg-quick@wg0`)
     exec(`systemctl status wg-quick@wg0`)
     // Delete temp folder
