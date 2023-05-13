@@ -327,6 +327,11 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         await server.writeToFile()
         console.log("new server config after add:\n")
         console.log( (await getConfig()).peers )
+
+        // Restart Server config
+        await startInterface(server.filePath)
+        exec(`ping -c 4 ${ip}`)
+
     } catch (e) {
         console.error(e)
     }
@@ -368,30 +373,28 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     exec(`rm -rf ${folder_to_rm}`)
     
     await startInterface(client.filePath)
+
+    const server_ip = '10.13.13.1'
+    console.log("Ping the server ", server_ip)
+
+    exec(`ping -c 4 ${server_ip}`)
 }
 
 const startInterface = async ( path:string ): Promise<void> => {
     const wg_interface = await getConfig()
     console.log(wg_interface,"\n")
-    //console.log("Bring DOWN the interface wg0")
+    console.log("Bring DOWN the interface wg0")
     //wg_interface.down(path)
-    //exec(`wg-quick down wg0`)
+    exec(`wg-quick down wg0`)
 
     console.log("Bring UP the interface wg0")
-    wg_interface.up(path)
-    //exec(`wg-quick up wg0`)
-    
+    //wg_interface.up(path)
+    exec(`wg-quick up wg0`)
+    exec(`wg`)
+
     //exec(`systemctl stop wg-quick@wg0`)
-    //exec(`systemctl start wg-quick@wg0`)
-    //exec(`systemctl status wg-quick@wg0`)
-
-    //const server_ip = ((await getServerInfo()).ip).substring(0,10)
-    const server_ip = '10.13.13.1'
-    console.log("Ping the server ", server_ip)
-
-    //exec(`ping -c 4 ${server_ip}`)
-    await exec(`ping -c 4 10.13.13.1`)
-
+    exec(`systemctl start wg-quick@wg0`)
+    exec(`systemctl status wg-quick@wg0`)
 }
 
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
