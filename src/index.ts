@@ -362,23 +362,25 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const host = client_ip.substring(9,ip.length)
     client.filePath =  path.join(process.env.FOLDER!, `/wg0.conf`)
     await client.writeToFile()
-    // Interface UP
-    // await client.up()
-    console.log("starting the interface wg0")
-    exec(`systemctl start wg-quick@wg0`)
-    exec(`systemctl status wg-quick@wg0`)
+    
     // Delete temp folder
     const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)
     exec(`rm -rf ${folder_to_rm}`)
-    // Ping the server
-    const server_ip = (await getServerInfo()).ip
-    //exec(`ping -c 4 ${server_ip}`)
-    exec(`ping -c 4 10.13.13.1`)
+    
 }
 
 const startInterface = async (): Promise<void> => {
+    console.log("starting the interface wg0")
     const wg_interface = await getConfig()
     await wg_interface.up()
+    
+    const server_ip = (await getServerInfo()).ip
+    console.log("Ping the server ", server_ip)
+    //exec(`systemctl start wg-quick@wg0`)
+    //exec(`systemctl status wg-quick@wg0`)
+    //exec(`ping -c 4 ${server_ip}`)
+    exec(`ping -c 4 10.13.13.1`)
+
 }
 
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
@@ -525,7 +527,7 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     const ip : string = data.ip
     const pubkey : string = data.publickey
     await writeConfClient(ip,pubkey)
-    //await startInterface()
+    await startInterface()
     return res.send ("File ready in /etc/wireguard/")
 }))
 
