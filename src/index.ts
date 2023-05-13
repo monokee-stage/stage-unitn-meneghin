@@ -374,23 +374,23 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     
     await startInterface(client.filePath)
 
-    const server_ip = '10.13.13.1'
-    console.log("\n \nPing the server ", server_ip)
-
-    exec(`ping -c 4 ${server_ip}`)
+    //const server_ip = '10.13.13.1'
+    //console.log("\n \nPing the server ", server_ip)
+    //exec(`ping -c 4 ${server_ip}`)
 }
 
 const startInterface = async ( path:string ): Promise<void> => {
     const wg_interface = await getConfig()
-    console.log(wg_interface,"\n")
-    console.log("Bring DOWN the interface wg0")
+    console.log("interface: \n",wg_interface,"\n")
+    
+    //console.log("Bring DOWN the interface wg0")
     //wg_interface.down(path)
-    await exec(`wg-quick down wg0`)
+    //await exec(`wg-quick down wg0`)
 
     console.log("Bring UP the interface wg0")
     //wg_interface.up(path)
-    await exec(`wg-quick up wg0`)
-    await exec(`wg`)
+    exec(`wg-quick up wg0`)
+    //await exec(`wg`)
 
     //await exec(`systemctl stop wg-quick@wg0`)
     //await exec(`systemctl start wg-quick@wg0`)
