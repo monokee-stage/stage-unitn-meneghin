@@ -329,9 +329,9 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         console.log( (await getConfig()).peers )
 
         // Restart Server config
+        await stopInterface(server.filePath)
         await startInterface(server.filePath)
-        exec(`ping -c 4 ${ip}`)
-
+        console.log("Exec wg command in order to show all peers")
     } catch (e) {
         console.error(e)
     }
@@ -373,7 +373,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     exec(`rm -rf ${folder_to_rm}`)
     
     await startInterface(client.filePath)
-
+    console.log("Try to ping the server at '10.13.13.1'")
     //const server_ip = '10.13.13.1'
     //console.log("\n \nPing the server ", server_ip)
     //exec(`ping -c 4 ${server_ip}`)
