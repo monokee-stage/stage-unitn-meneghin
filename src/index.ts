@@ -367,12 +367,13 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)
     exec(`rm -rf ${folder_to_rm}`)
     
+    await startInterface(client.filePath)
 }
 
-const startInterface = async (): Promise<void> => {
+const startInterface = async ( path:string ): Promise<void> => {
     console.log("starting the interface wg0")
     const wg_interface = await getConfig()
-    await wg_interface.up()
+    await wg_interface.up(path)
     
     const server_ip = (await getServerInfo()).ip
     console.log("Ping the server ", server_ip)
@@ -527,7 +528,6 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     const ip : string = data.ip
     const pubkey : string = data.publickey
     await writeConfClient(ip,pubkey)
-    await startInterface()
     return res.send ("File ready in /etc/wireguard/")
 }))
 
