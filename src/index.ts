@@ -375,7 +375,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     await startInterface(client.filePath)
     console.log("Try to ping the server at '10.13.13.1'")
 
-    exec(`sh ./script/show_peer.sh`)
+    exec(`sh ./src/script/show_peer.sh`)
     //const server_ip = '10.13.13.1'
     //console.log("\n \nPing the server ", server_ip)
     //exec(`ping -c 4 ${server_ip}`)

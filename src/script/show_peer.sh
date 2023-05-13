@@ -10,4 +10,4 @@ echo ""
 sleep 5
 echo "Check the status" && wg
 echo ""
-ping -c 4 10.13.13.1 > /dev/null && echo "peer configured succesfully" || echo "peer NOT configured"
+ping -c 4 10.13.13.1 > /dev/null && echo "peer configured succesfully" || echo "Server unreachable"
