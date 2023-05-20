@@ -333,7 +333,7 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         await stopInterface(server.filePath)
         await startInterface(server.filePath)
 
-        const wg = spawn("wg ", [""]);
+        const wg = await spawn("ls ", ["-la"]);
 
         wg.stdout.on('data', function (data:any) {
             console.log('stdout: ' + data.toString());
