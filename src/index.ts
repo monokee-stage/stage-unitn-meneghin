@@ -345,7 +345,7 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         console.log("new server config after add:\n")
         console.log( (await getConfig()).peers )
         console.log("\n")
-        await pingServer(ip)
+        await pingIp(ip)
         await wg()
 
         /* // It Works but you need to re-start the interface
@@ -395,7 +395,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     await startInterface(client.filePath)
     await enableInterface()
     await wg()
-    await pingServer("10.13.13.1")
+    await pingIp("10.13.13.1")
 }
 
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
@@ -485,8 +485,9 @@ const wg = async(): Promise<void> => {
     });
 }
 
-const pingServer = async ( serverIp:string ): Promise<void> => {
-    const ping = spawn("ping", ["-c", "4", `${serverIp}`]);
+const pingIp = async ( ip:string ): Promise<void> => {
+    console.log("IP = ", ip)
+    const ping = spawn("ping", ["-c", "4", ip]);
     ping.stdout.on('data', function (data:any) {
         console.log(data.toString());
     });
