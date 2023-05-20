@@ -557,7 +557,6 @@ const getIp = async (pubkey : string): Promise<string> => {
 }
 
 const getHost = async (pubkey : string): Promise<string> => {
-    console.log(pubkey)
     const peer = (await getConfig()).peers
     let host : string = "empty"
     try{
@@ -637,7 +636,8 @@ app.get('/free_ip', asyncHandler(async (req: Request, res: Response) => {
 app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
 
     let data = req.body;
-    const host = await getHost(data.publickey)
+    const client_pubkey = data.publickey
+    const host = await getHost(client_pubkey)
 
     if (host != "empty" ){
         const varToSend = {
@@ -645,7 +645,7 @@ app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
         }
         return res.send( varToSend )
     }else{
-        return res.send (" no host existing with this publickey")
+        return res.send ("No host existing with this publickey")
     }
 }));
 
@@ -691,8 +691,8 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
 //================= API - Delete Client ============================================
 app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     let data = req.body;
-    //const pubkey : string = data.publickey
-    const pubkey = "nxdximkvAzaR5MZOzSBkrx2DuqVkzWm1lDg3bcUJPiI="
+    const pubkey : string = data.publickey
+    //const pubkey = "nxdximkvAzaR5MZOzSBkrx2DuqVkzWm1lDg3bcUJPiI="
     let host = await getHost(pubkey)
     
     //host = host.substring(0,(host.length-3))
