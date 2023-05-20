@@ -557,6 +557,7 @@ const getIp = async (pubkey : string): Promise<string> => {
 }
 
 const getHost = async (pubkey : string): Promise<string> => {
+    console.log("pubkey ", pubkey)
     const peer = (await getConfig()).peers
     let host : string = "empty"
     try{
@@ -700,7 +701,7 @@ app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
         deleteClient(pubkey)
         return res.send ( "Client " + host + " deleted succesfully ")
     }else{
-        return res.send ("No client existing with this publickey" + host)
+        return res.send ("No client existing with this publickey: " + host)
     }
 }));
 
