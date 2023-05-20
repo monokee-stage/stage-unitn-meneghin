@@ -407,8 +407,9 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
     console.log(pubkey)
     console.log("from the server ", server.wgInterface!.address![0])
     try{
-        const host = await getHost(pubkey)
+        //const host = await getHost(pubkey)
         const ip = await getIp(pubkey)
+        console.log(ip)
         
         //wg set wg0 peer $pubkey remove
         const add = await spawn("wg", ["set", "wg0", "peer", `"${pubkey}"`, "remove"], { stdio: [], shell: true });
