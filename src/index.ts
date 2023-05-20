@@ -636,7 +636,7 @@ app.get('/free_ip', asyncHandler(async (req: Request, res: Response) => {
 app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
 
     let data = req.body;
-    const client_pubkey = data.publickey
+    const client_pubkey = data.publicKey
     const host = await getHost(client_pubkey)
 
     if (host != "empty" ){
@@ -656,7 +656,7 @@ app.put('/request', asyncHandler(async(req: Request, res: Response) => {
     console.log("Client Request sent correctly")
 
     const pubkey = {
-        publickey : await clientRequest()
+        publicKey : await clientRequest()
     }
 
     return res.send (pubkey)
@@ -667,7 +667,7 @@ app.put('/request', asyncHandler(async(req: Request, res: Response) => {
 app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
     const server = await getConfig()
     let data = req.body;
-    const client_pubkey = data.publickey
+    const client_pubkey = data.publicKey
     const ip_returned = await srvCreatePeer(server, client_pubkey)
     const new_client = {
         ip : (ip_returned).substring(0,(ip_returned.length-3)),
@@ -682,7 +682,7 @@ app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
 app.put('/create', asyncHandler(async(req: Request, res: Response) => {
     let data = req.body;
     const ip : string = data.ip
-    const pubkey : string = data.publickey
+    const pubkey : string = data.publicKey
     await writeConfClient(ip,pubkey)
     return res.send ("File ready in /etc/wireguard/")
 }))
@@ -691,7 +691,7 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
 //================= API - Delete Client ============================================
 app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     let data = req.body;
-    const pubkey:string = data.publickey
+    const pubkey:string = data.publicKey
     //const pubkey = "nxdximkvAzaR5MZOzSBkrx2DuqVkzWm1lDg3bcUJPiI="
     let host = await getHost(pubkey)
     
