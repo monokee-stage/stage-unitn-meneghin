@@ -564,7 +564,8 @@ const getHost = async (pubkey : string): Promise<string> => {
     try{
         for(let i=0; i<peer!.length; i++){
             let ip = peer![i].allowedIps![0]
-            console.log("ip: [",ip, "]")
+            let publicKey = peer![i].publicKey!
+            console.log("ip: [",ip, "] - public key: [ ",publicKey, " ]")
             if(pubkey === peer![i].publicKey!){
                 host = (ip).substring(9,(ip.length-3))
                 console.log("ip: ", ip, " | host: ", host)
