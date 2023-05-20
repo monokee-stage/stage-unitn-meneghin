@@ -559,6 +559,7 @@ const getIp = async (pubkey : string): Promise<string> => {
 const getHost = async (pubkey : string): Promise<string> => {
     console.log("pubkey ", pubkey)
     const peer = (await getConfig()).peers
+    console.log(peer!.length)
     let host : string = "empty"
     try{
         for(let i=0; i<peer!.length; i++){
@@ -581,7 +582,6 @@ const asyncHandler = (fun: any) => (req: Request, res: Response, next: NextFunct
     Promise.resolve(fun(req, res, next))
         .catch(next)
 }
-
 
 app.use(bodyParser.json())
 
