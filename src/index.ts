@@ -344,7 +344,7 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
 
         console.log("new server config after add:\n")
         console.log( (await getConfig()).peers )
-        console.log("\n"))
+        console.log("\n")
         await wg()
 
         /* // It Works but you need to re-start the interface
