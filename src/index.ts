@@ -691,7 +691,7 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
 //================= API - Delete Client ============================================
 app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     let data = req.body;
-    const pubkey : string = data.publickey
+    const pubkey:string = data.publickey
     //const pubkey = "nxdximkvAzaR5MZOzSBkrx2DuqVkzWm1lDg3bcUJPiI="
     let host = await getHost(pubkey)
     
@@ -700,7 +700,7 @@ app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
         deleteClient(pubkey)
         return res.send ( "Client " + host + " deleted succesfully ")
     }else{
-        return res.send ("No client existing with this publickey")
+        return res.send ("No client existing with this publickey" + host)
     }
 }));
 
