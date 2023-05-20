@@ -324,10 +324,10 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
     new_peer.name = `Client-${host}`
     new_peer.publicKey = client_pubkey
     try{
-        server.addPeer(new_peer)                    // Using Libraries
-        await server.writeToFile()                  // Using Libraries
+        server.addPeer(new_peer)
+        await server.writeToFile()
 
-
+        // Adding peer into the interface by adding the route using snippets instead of library in order to avoid the re-start of the interface
         //wg set wg0 peer $pubkey allowed-ips $ipc
         const add = await spawn("wg", ["set", "wg0", "peer", `"${client_pubkey}"`, "allowed-ips", `${full_Ip}`], { stdio: [], shell: true });
         add.stdout.on('data', function (data:any) {
@@ -339,39 +339,19 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         add.on('exit', function (code:any) {
             console.log('child process exited with code ' + code.toString());
         });
-            
-        //ip -4 route add $ipc dev wg0
-        const addRoute = await spawn("ip", ["-4", "route", "add", full_Ip, "dev", "wg0"]);
-        addRoute.stdout.on('data', function (data:any) {
-            console.log(data.toString());
-        });
-        addRoute.stderr.on('data', function (data:any) {
-            console.log('ERROR: ' + data.toString());
-        });
-        addRoute.on('exit', function (code:any) {
-            console.log('child process exited with code ' + code.toString());
-        });
 
+        await addRoute(full_Ip)
 
         console.log("new server config after add:\n")
         console.log( (await getConfig()).peers )
-        /*
+        console.log("\n"))
+        await wg()
 
+        /* // It Works but you need to re-start the interface
         // Restart Server config
         await stopInterface(server.filePath)
         await startInterface(server.filePath)
         */
-        const wg = await spawn("wg");
-
-        wg.stdout.on('data', function (data:any) {
-            console.log(data.toString());
-        });
-        wg.stderr.on('data', function (data:any) {
-            console.log('ERROR: ' + data.toString());
-        });
-        wg.on('exit', function (code:any) {
-            console.log('child process exited with code ' + code.toString());
-        });
     } catch (e) {
         console.error(e)
     }
@@ -412,8 +392,8 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)
     exec(`rm -rf ${folder_to_rm}`)
     await startInterface(client.filePath)
+    await wg()
     await pingServer("10.13.13.1")
-    
 }
 
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
@@ -423,7 +403,7 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
     console.log("from the server ", server.wgInterface!.address![0])
     try{
         const host = await getHost(pubkey)
-        server.removePeer(pubkey)                                      // INPUT: null - OUTPUT: Server config file . peers
+        server.removePeer(pubkey)
         await server.writeToFile()
         console.log("New peers list:")
         console.log(server.peers)
@@ -435,9 +415,9 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
 
 const startInterface = async ( path:string ): Promise<void> => {
     const wg_interface = await getConfig()
-    wg_interface.up(path)
+    wg_interface.up(path)                                             // Using libraries
 
-    await delay(2000);
+    await delay(1000);
 
     // show interface status
     const sh = spawn("systemctl", ["status","wg-quick@wg0"]);
@@ -457,6 +437,34 @@ const stopInterface = async ( path:string ): Promise<void> => {
     wg_interface.down(path)
 }
 
+const addRoute = async ( ip:string) : Promise<void> => {
+    // Execution of: ip -4 route add $ipc dev wg0
+    const addDevRoute = await spawn("ip", ["-4", "route", "add", ip, "dev", "wg0"]);
+    addDevRoute.stdout.on('data', function (data:any) {
+        console.log(data.toString());
+    });
+    addDevRoute.stderr.on('data', function (data:any) {
+        console.log('ERROR: ' + data.toString());
+    });
+    addDevRoute.on('exit', function (code:any) {
+        console.log('child process exited with code ' + code.toString());
+    });
+}
+
+const wg = async(): Promise<void> => {
+    // Esecution of: wg
+    const wg = await spawn("wg");
+
+    wg.stdout.on('data', function (data:any) {
+        console.log(data.toString());
+    });
+    wg.stderr.on('data', function (data:any) {
+        console.log('ERROR: ' + data.toString());
+    });
+    wg.on('exit', function (code:any) {
+        console.log('child process exited with code ' + code.toString());
+    });
+}
 
 const pingServer = async ( serverIp:string ): Promise<void> => {
     const ping = spawn("ping", ["-c", "4", `${serverIp}`]);
