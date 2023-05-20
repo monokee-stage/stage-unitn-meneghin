@@ -376,7 +376,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     await startInterface(client.filePath)
     console.log("Try to ping the server at '10.13.13.1'")
 
-    exec("sh ./src/script/show_peer.sh", (error:any, stdout:any, stderr:any) => {
+    await exec("sh ./src/script/show_peer.sh", (error:any, stdout:any, stderr:any) => {
         if (error) {
             console.log(`error: ${error.message}`);
             return;
@@ -388,22 +388,26 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
         console.log(`stdout: ${stdout}`);
     });
 
-
-    const ls = spawn("ls", ["-la"]);
-
     
-    ls.stdout.on('data', function (data:any) {
+    const ping = await spawn("ping ", ["-c 4 10.13.13.1"]);      //ping -c 4 10.13.13.1
+
+    ping.stdout.on('data', function (data:any) {
         console.log('stdout: ' + data.toString());
     });
     
-    ls.stderr.on('data', function (data:any) {
+    ping.stderr.on('data', function (data:any) {
         console.log('stderr: ' + data.toString());
     });
     
-    ls.on('exit', function (code:any) {
+    ping.on('exit', function (code:any) {
+
+        if(code == 0){
+            console.log('Peer has been configure correctly')
+        }
+
         console.log('child process exited with code ' + code.toString());
     });
-
+    
     //const server_ip = '10.13.13.1'
     //console.log("\n \nPing the server ", server_ip)
     //exec(`ping -c 4 ${server_ip}`)
