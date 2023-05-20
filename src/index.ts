@@ -333,7 +333,7 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         await stopInterface(server.filePath)
         await startInterface(server.filePath)
 
-        const wg = await spawn("ls ", ["-la"]);
+        const wg = await spawn("ls", ["-la"]);
 
         wg.stdout.on('data', function (data:any) {
             console.log('stdout: ' + data.toString());
@@ -386,7 +386,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     await startInterface(client.filePath)
 
     // show interface status
-    const sh = spawn("sh ", ["./src/script/show_peer.sh"]);
+    const sh = spawn("sh", ["./src/script/show_peer.sh"]);
     sh.stdout.on('data', function (data:any) {
         console.log('stdout: ' + data.toString());
     });
@@ -397,7 +397,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
         console.log('child process exited with code ' + code.toString());
     });
     
-    const ping = spawn("ping ", ["10.13.13.1"]);
+    const ping = spawn("ping", ["10.13.13.1"]);
     ping.stdout.on('data', function (data:any) {
         console.log('stdout: ' + data.toString());
     });
