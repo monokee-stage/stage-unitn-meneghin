@@ -324,26 +324,12 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
     new_peer.name = `Client-${host}`
     new_peer.publicKey = client_pubkey
     try{
-        //server.addPeer(new_peer)                    // Using Libraries
-        //await server.writeToFile()                  // Using Libraries
-        //wg set wg0 peer $pubkey allowed-ips $ipc
-        const echo = await spawn("echo", [client_pubkey, `${full_Ip}`]);
-        echo.stdout.on('data', function (data:any) {
-            console.log(data.toString());
-        });
-        echo.stderr.on('data', function (data:any) {
-            console.log('ERROR: ' + data.toString());
-        });
-        echo.on('exit', function (code:any) {
-            console.log('child process exited with code ' + code.toString());
-        });
-
-
-
+        server.addPeer(new_peer)                    // Using Libraries
+        await server.writeToFile()                  // Using Libraries
 
 
         //wg set wg0 peer $pubkey allowed-ips $ipc
-        const add = await spawn("wg", ["set", "wg0", "peer", `"`, client_pubkey, `"`, "allowed-ips", `${full_Ip}`]);
+        const add = await spawn("wg", ["set", "wg0", "peer", `"${client_pubkey}"`, "allowed-ips", `${full_Ip}`], { stdio: [], shell: true });
         add.stdout.on('data', function (data:any) {
             console.log(data.toString());
         });
