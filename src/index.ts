@@ -328,7 +328,7 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         //await server.writeToFile()                  // Using Libraries
 
         //wg set wg0 peer $pubkey allowed-ips $ipc
-        const add = await spawn("wg", ["set", "wg0", "peer", `"${client_pubkey}"`, "allowed-ips", `${full_Ip}`]);
+        const add = await spawn("wg", ["set", "wg0", "peer", '"', `${client_pubkey}`, '"', "allowed-ips", `${full_Ip}`]);
         add.stdout.on('data', function (data:any) {
             console.log(data.toString());
         });
