@@ -538,7 +538,8 @@ const pingIp = async ( ip:string ): Promise<void> => {
 
 const getIp = async (pubkey : string): Promise<string> => {
     const peer = (await getConfig()).peers
-    let ip : string = "empty"
+    let ip : string = ""
+    let count = 0
     try{
         for(let i=0; i<peer!.length; i++){
             let ip_temp = peer![i].allowedIps![0]
@@ -547,7 +548,10 @@ const getIp = async (pubkey : string): Promise<string> => {
                 ip = ip_temp
                 //console.log("ip: ", ip)
             }else{
-                throw new Error(`Not able to find a match between the pubkey provided and the hosts created`)           // Fix new Error, show error even it works correctly
+                count = count + 1
+                if(count == peer!.length){
+                    throw new Error(`Not able to find a match between the pubkey provided and the ips available`) 
+                }
             }
         }
     } catch (e) {
@@ -560,13 +564,12 @@ const getHost = async (pubkey : string): Promise<string> => {
     console.log("pubkey ", pubkey)
     const peer = (await getConfig()).peers
     console.log(peer!.length)
-    let host : string = "empty"
+    let host : string = ""
     let count = 0
     try{
         for(let i=0; i<peer!.length; i++){
             let ip = peer![i].allowedIps![0]
             let publicKey = peer![i].publicKey!
-            console.log("ip: [",ip, "] - public key: [ ",publicKey, " ]")
             if(pubkey === peer![i].publicKey!){
                 host = (ip).substring(9,(ip.length-3))
                 console.log("ip: ", ip, " | host: ", host)
