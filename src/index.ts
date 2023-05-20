@@ -561,6 +561,7 @@ const getHost = async (pubkey : string): Promise<string> => {
     const peer = (await getConfig()).peers
     console.log(peer!.length)
     let host : string = "empty"
+    let count = 0
     try{
         for(let i=0; i<peer!.length; i++){
             let ip = peer![i].allowedIps![0]
@@ -570,8 +571,12 @@ const getHost = async (pubkey : string): Promise<string> => {
                 host = (ip).substring(9,(ip.length-3))
                 console.log("ip: ", ip, " | host: ", host)
             }else{
-                throw new Error(`Not able to find a match between the pubkey provided and the hosts created`)           // Fix new Error, show error even it works correctly
+                count = count + 1
+                if(count == peer!.length){
+                    throw new Error(`Not able to find a match between the pubkey provided and the hosts created`) 
+                }
             }
+            
         }
     } catch (e) {
         console.error(e)
