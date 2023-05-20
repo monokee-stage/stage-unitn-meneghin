@@ -18,6 +18,7 @@ import {
     createPeerPairs
     } from 'wireguard-tools'
 const { exec } = require('child_process')
+const { spawn } = require('child_process')
 const util = require('util');
 var bodyParser = require('body-parser')
 var jsonParser = bodyParser.json()
@@ -375,7 +376,38 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     await startInterface(client.filePath)
     console.log("Try to ping the server at '10.13.13.1'")
 
-    exec(`sh ./src/script/show_peer.sh`)
+    exec("sh ./src/script/show_peer.sh", (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+    });
+
+
+
+    const ls = spawn("ls", ["-la"]);
+
+    ls.stdout.on("data", data => {
+        console.log(`stdout: ${data}`);
+    });
+
+    ls.stderr.on("data", data => {
+        console.log(`stderr: ${data}`);
+    });
+
+    ls.on('error', (error) => {
+        console.log(`error: ${error.message}`);
+    });
+
+    ls.on("close", code => {
+        console.log(`child process exited with code ${code}`);
+    });
+
     //const server_ip = '10.13.13.1'
     //console.log("\n \nPing the server ", server_ip)
     //exec(`ping -c 4 ${server_ip}`)
