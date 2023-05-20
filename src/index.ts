@@ -318,14 +318,31 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
     const host = ip.substring(9,ip.length)
     const full_Ip = ip.concat('/32')
     // Write file into server config file
-    const new_peer = server.createPeer({
-        allowedIps: [full_Ip]
-    })
-    new_peer.name = `Client-${host}`
-    new_peer.publicKey = client_pubkey
+    //const new_peer = server.createPeer({
+    //    allowedIps: [full_Ip]
+    //})
+    //new_peer.name = `Client-${host}`
+    //new_peer.publicKey = client_pubkey
     try{
-        server.addPeer(new_peer)
-        await server.writeToFile()
+        //server.addPeer(new_peer)                    // Using Libraries
+        //await server.writeToFile()                  // Using Libraries
+
+        //wg set wg0 peer $pubkey allowed-ips $ipc
+        const add = await spawn("wg", ["set", "wg0", "peer", `${client_pubkey}`, "allowed-ips", `${full_Ip}`]);
+        add.stdout.on('data', function (data:any) {
+            console.log(data.toString());
+        });
+        add.stderr.on('data', function (data:any) {
+            console.log('ERROR: ' + data.toString());
+        });
+        add.on('exit', function (code:any) {
+            console.log('child process exited with code ' + code.toString());
+        });
+            
+        //ip -4 route add $ipc dev wg0
+
+
+
         console.log("new server config after add:\n")
         console.log( (await getConfig()).peers )
 
@@ -403,7 +420,7 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
         console.error(e)
     }
     return server
-} 
+}
 
 const startInterface = async ( path:string ): Promise<void> => {
     const wg_interface = await getConfig()
@@ -412,7 +429,7 @@ const startInterface = async ( path:string ): Promise<void> => {
     await delay(2000);
 
     // show interface status
-    const sh = spawn("sysctl", ["status","wg-quick@wg0"]);
+    const sh = spawn("systemctl", ["status","wg-quick@wg0"]);
     sh.stdout.on('data', function (data:any) {
         console.log(data.toString());
     });
