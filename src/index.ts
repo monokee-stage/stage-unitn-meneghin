@@ -318,14 +318,29 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
     const host = ip.substring(9,ip.length)
     const full_Ip = ip.concat('/32')
     // Write file into server config file
-    //const new_peer = server.createPeer({
-    //    allowedIps: [full_Ip]
-    //})
-    //new_peer.name = `Client-${host}`
-    //new_peer.publicKey = client_pubkey
+    const new_peer = server.createPeer({
+        allowedIps: [full_Ip]
+    })
+    new_peer.name = `Client-${host}`
+    new_peer.publicKey = client_pubkey
     try{
         //server.addPeer(new_peer)                    // Using Libraries
         //await server.writeToFile()                  // Using Libraries
+        //wg set wg0 peer $pubkey allowed-ips $ipc
+        const echo = await spawn("echo", [client_pubkey, `${full_Ip}`]);
+        echo.stdout.on('data', function (data:any) {
+            console.log(data.toString());
+        });
+        echo.stderr.on('data', function (data:any) {
+            console.log('ERROR: ' + data.toString());
+        });
+        echo.on('exit', function (code:any) {
+            console.log('child process exited with code ' + code.toString());
+        });
+
+
+
+
 
         //wg set wg0 peer $pubkey allowed-ips $ipc
         const add = await spawn("wg", ["set", "wg0", "peer", `"`, client_pubkey, `"`, "allowed-ips", `${full_Ip}`]);
@@ -340,16 +355,26 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         });
             
         //ip -4 route add $ipc dev wg0
-
+        const addRoute = await spawn("ip", ["-4", "route", "add", full_Ip, "dev", "wg0"]);
+        addRoute.stdout.on('data', function (data:any) {
+            console.log(data.toString());
+        });
+        addRoute.stderr.on('data', function (data:any) {
+            console.log('ERROR: ' + data.toString());
+        });
+        addRoute.on('exit', function (code:any) {
+            console.log('child process exited with code ' + code.toString());
+        });
 
 
         console.log("new server config after add:\n")
         console.log( (await getConfig()).peers )
+        /*
 
         // Restart Server config
         await stopInterface(server.filePath)
         await startInterface(server.filePath)
-
+        */
         const wg = await spawn("wg");
 
         wg.stdout.on('data', function (data:any) {
