@@ -392,6 +392,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)
     exec(`rm -rf ${folder_to_rm}`)
     await startInterface(client.filePath)
+    await enableInterface()
     await wg()
     await pingServer("10.13.13.1")
 }
@@ -430,6 +431,23 @@ const startInterface = async ( path:string ): Promise<void> => {
     sh.on('exit', function (code:any) {
         console.log('child process exited with code ' + code.toString());
     });
+}
+
+const enableInterface = async (): Promise<void> => {
+
+    // Default enable interface at startup
+    const sh = spawn("systemctl", ["enable","wg-quick@wg0"]);
+    sh.stdout.on('data', function (data:any) {
+        console.log(data.toString());
+    });
+    sh.stderr.on('data', function (data:any) {
+        console.log('ERROR: ' + data.toString());
+    });
+    sh.on('exit', function (code:any) {
+        console.log('child process exited with code ' + code.toString());
+    });
+
+    console.log("wg0 Enable at startup")
 }
 
 const stopInterface = async ( path:string ): Promise<void> => {
