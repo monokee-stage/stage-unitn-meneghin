@@ -405,11 +405,9 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
     const server = await getConfig()
     console.log("Will be deleted the client:")
     console.log(pubkey)
-    console.log("from the server ", server.wgInterface!.address![0])
+    console.log("from the server ", server.wgInterface!.address![0],"\n")
     try{
-        //const host = await getHost(pubkey)
         const ip = await getIp(pubkey)
-        console.log(ip)
         
         //wg set wg0 peer $pubkey remove
         const add = await spawn("wg", ["set", "wg0", "peer", `"${pubkey}"`, "remove"], { stdio: [], shell: true });
@@ -544,10 +542,11 @@ const getIp = async (pubkey : string): Promise<string> => {
     let ip : string = "empty"
     try{
         for(let i=0; i<peer!.length; i++){
-            let ip = peer![i].allowedIps![0]
+            let ip_temp = peer![i].allowedIps![0]
 
             if(pubkey === peer![i].publicKey){
-                console.log("ip: ", ip)
+                ip = ip_temp
+                //console.log("ip: ", ip)
             }else{
                 throw new Error(`Not able to find a match between the pubkey provided and the hosts created`)           // Fix new Error, show error even it works correctly
             }
@@ -558,8 +557,6 @@ const getIp = async (pubkey : string): Promise<string> => {
     return ip
 }
 
-
-
 const getHost = async (pubkey : string): Promise<string> => {
     const peer = (await getConfig()).peers
     let host : string = "empty"
@@ -568,8 +565,8 @@ const getHost = async (pubkey : string): Promise<string> => {
             let ip = peer![i].allowedIps![0]
 
             if(pubkey === peer![i].publicKey){
-                host = (ip).substring(9,ip.length)
-                console.log("ip: ", ip, " | host: ", host)
+                host = (ip).substring(9,(ip.length-3))
+                //console.log("ip: ", ip, " | host: ", host)
             }else{
                 throw new Error(`Not able to find a match between the pubkey provided and the hosts created`)           // Fix new Error, show error even it works correctly
             }
