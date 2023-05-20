@@ -392,9 +392,12 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     // Delete temp folder
     const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)
     exec(`rm -rf ${folder_to_rm}`)
+    
+    // Start Interface and test
     await startInterface(client.filePath)
     await enableInterface()
     await wg()
+    await delay(2000)
     await pingIp("10.13.13.1")
 }
 
