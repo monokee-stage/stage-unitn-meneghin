@@ -671,7 +671,7 @@ app.put('/server/', asyncHandler(async(req: Request, res: Response) => {
     const ip_returned = await srvCreatePeer(server, client_pubkey)
     const new_client = {
         ip : (ip_returned).substring(0,(ip_returned.length-3)),
-        publickey: client_pubkey
+        publicKey: client_pubkey
     }
     return res.send ( new_client )
 }))
