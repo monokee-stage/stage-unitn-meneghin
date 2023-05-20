@@ -345,7 +345,6 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         console.log("new server config after add:\n")
         console.log( (await getConfig()).peers )
         console.log("\n")
-        await pingIp(ip)
         await wg()
 
         /* // It Works but you need to re-start the interface
@@ -691,8 +690,8 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
 //================= API - Delete Client ============================================
 app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     let data = req.body;
-    //const pubkey : string = data.publickey
-    const pubkey = "RVVFVB0NC9IKjImgbUzTSbUwWFEyUkEl9tnZPcooDXk="
+    const pubkey : string = data.publickey
+    //const pubkey = "RVVFVB0NC9IKjImgbUzTSbUwWFEyUkEl9tnZPcooDXk="
     let host = await getHost(pubkey)
     
     //host = host.substring(0,(host.length-3))
