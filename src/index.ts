@@ -336,10 +336,10 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         const wg = await spawn("wg");
 
         wg.stdout.on('data', function (data:any) {
-            console.log('stdout: ' + data.toString());
+            console.log(data.toString());
         });
         wg.stderr.on('data', function (data:any) {
-            console.log('stderr: ' + data.toString());
+            console.log('ERROR: ' + data.toString());
         });
         wg.on('exit', function (code:any) {
             console.log('child process exited with code ' + code.toString());
@@ -384,37 +384,8 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)
     exec(`rm -rf ${folder_to_rm}`)
     await startInterface(client.filePath)
-
-    // show interface status
-    const sh = spawn("sysctl", ["status","wg-quick@wg0"]);
-    sh.stdout.on('data', function (data:any) {
-        console.log('stdout: ' + data.toString());
-    });
-    sh.stderr.on('data', function (data:any) {
-        console.log('stderr: ' + data.toString());
-    });
-    sh.on('exit', function (code:any) {
-        console.log('child process exited with code ' + code.toString());
-    });
+    await pingServer("10.13.13.1")
     
-    // PING
-    const ping = spawn("ping", ["-c", "4", "10.13.13.1"]);
-    ping.stdout.on('data', function (data:any) {
-        console.log('stdout: ' + data.toString());
-    });
-    ping.stderr.on('data', function (data:any) {
-        console.log('stderr: ' + data.toString());
-    });
-    ping.on('exit', function (code:any) {
-        if(code == 0){
-            console.log('Peer has been configure correctly')
-        }
-        console.log('child process exited with code ' + code.toString());
-    });
-    
-    //const server_ip = '10.13.13.1'
-    //console.log("\n \nPing the server ", server_ip)
-    //exec(`ping -c 4 ${server_ip}`)
 }
 
 const deleteClient = async (pubkey : string): Promise<WgConfig> => {
@@ -436,25 +407,45 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
 
 const startInterface = async ( path:string ): Promise<void> => {
     const wg_interface = await getConfig()
-    console.log("Bring UP the interface wg0")
     wg_interface.up(path)
-    //exec(`wg-quick up wg0`)
 
-    //exec(`wg`)
+    await delay(2000);
 
-    //await exec(`systemctl stop wg-quick@wg0`)
-    //await exec(`systemctl start wg-quick@wg0`)
-    //await exec(`systemctl status wg-quick@wg0`)
+    // show interface status
+    const sh = spawn("sysctl", ["status","wg-quick@wg0"]);
+    sh.stdout.on('data', function (data:any) {
+        console.log(data.toString());
+    });
+    sh.stderr.on('data', function (data:any) {
+        console.log('ERROR: ' + data.toString());
+    });
+    sh.on('exit', function (code:any) {
+        console.log('child process exited with code ' + code.toString());
+    });
 }
 
 const stopInterface = async ( path:string ): Promise<void> => {
     const wg_interface = await getConfig()
-    console.log("Bring DOWN the interface wg0")
-    //wg_interface.down(path)
     wg_interface.down(path)
-    //exec(`wg-quick down wg0`)
+}
 
-    //exec(`wg`)
+
+const pingServer = async ( serverIp:string ): Promise<void> => {
+    const ping = spawn("ping", ["-c", "4", `${serverIp}`]);
+    ping.stdout.on('data', function (data:any) {
+        console.log(data.toString());
+    });
+    ping.stderr.on('data', function (data:any) {
+        console.log('ERROR: ' + data.toString());
+    });
+    ping.on('exit', function (code:any) {
+        if(code == 0){
+            console.log('Peer has been configure correctly')
+        }else{
+            console.log('ERROR: child process exited with code ' + code.toString());
+        }
+    });
+
 }
 
 const getHost = async (pubkey : string): Promise<string> => {
