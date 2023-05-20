@@ -336,9 +336,9 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         add.stderr.on('data', function (data:any) {
             console.log('ERROR: ' + data.toString());
         });
-        add.on('exit', function (code:any) {
-            console.log('child process exited with code ' + code.toString());
-        });
+        //add.on('exit', function (code:any) {
+        //    console.log('Add peer process exited with code ' + code.toString());
+        //});
 
         await addRoute(full_Ip)
 
@@ -409,16 +409,16 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
         const ip = await getIp(pubkey)
         
         //wg set wg0 peer $pubkey remove
-        const add = await spawn("wg", ["set", "wg0", "peer", `"${pubkey}"`, "remove"], { stdio: [], shell: true });
-        add.stdout.on('data', function (data:any) {
+        const remove = await spawn("wg", ["set", "wg0", "peer", `"${pubkey}"`, "remove"], { stdio: [], shell: true });
+        remove.stdout.on('data', function (data:any) {
             console.log(data.toString());
         });
-        add.stderr.on('data', function (data:any) {
+        remove.stderr.on('data', function (data:any) {
             console.log('ERROR: ' + data.toString());
         });
-        add.on('exit', function (code:any) {
-            console.log('child process exited with code ' + code.toString());
-        });
+        //remove.on('exit', function (code:any) {
+        //    console.log('remove peer process exited with code ' + code.toString());
+        //});
         await deleteRoute(ip)
 
         console.log(pubkey)
@@ -440,31 +440,31 @@ const startInterface = async ( path:string ): Promise<void> => {
     await delay(1000);
 
     // show interface status
-    const sh = spawn("systemctl", ["status","wg-quick@wg0"]);
-    sh.stdout.on('data', function (data:any) {
+    const systemctl2 = spawn("systemctl", ["status","wg-quick@wg0"]);
+    systemctl2.stdout.on('data', function (data:any) {
         console.log(data.toString());
     });
-    sh.stderr.on('data', function (data:any) {
+    systemctl2.stderr.on('data', function (data:any) {
         console.log('ERROR: ' + data.toString());
     });
-    sh.on('exit', function (code:any) {
-        console.log('child process exited with code ' + code.toString());
-    });
+    //systemctl2.on('exit', function (code:any) {
+    //    console.log('systemctl status process exited with code ' + code.toString());
+    //});
 }
 
 const enableInterface = async (): Promise<void> => {
 
     // Default enable interface at startup
-    const sh = spawn("systemctl", ["enable","wg-quick@wg0"]);
-    sh.stdout.on('data', function (data:any) {
+    const systemctl = spawn("systemctl", ["enable","wg-quick@wg0"]);
+    systemctl.stdout.on('data', function (data:any) {
         console.log(data.toString());
     });
-    sh.stderr.on('data', function (data:any) {
+    systemctl.stderr.on('data', function (data:any) {
         console.log('ERROR: ' + data.toString());
     });
-    sh.on('exit', function (code:any) {
-        console.log('child process exited with code ' + code.toString());
-    });
+    //systemctl.on('exit', function (code:any) {
+    //    console.log('systemctl enable process exited with code ' + code.toString());
+    //});
 
     console.log("wg0 Enable at startup")
 }
@@ -483,9 +483,9 @@ const addRoute = async ( ip:string) : Promise<void> => {
     addDevRoute.stderr.on('data', function (data:any) {
         console.log('ERROR: ' + data.toString());
     });
-    addDevRoute.on('exit', function (code:any) {
-        console.log('child process exited with code ' + code.toString());
-    });
+    //addDevRoute.on('exit', function (code:any) {
+    //    console.log('Add Route process exited with code ' + code.toString());
+    //});
 }
 
 const deleteRoute = async ( ip:string) : Promise<void> => {
@@ -497,9 +497,9 @@ const deleteRoute = async ( ip:string) : Promise<void> => {
     addDevRoute.stderr.on('data', function (data:any) {
         console.log('ERROR: ' + data.toString());
     });
-    addDevRoute.on('exit', function (code:any) {
-        console.log('child process exited with code ' + code.toString());
-    });
+    //addDevRoute.on('exit', function (code:any) {
+    //    console.log('Delete Route process exited with code ' + code.toString());
+    //});
 }
 
 const wg = async(): Promise<void> => {
@@ -512,9 +512,9 @@ const wg = async(): Promise<void> => {
     wg.stderr.on('data', function (data:any) {
         console.log('ERROR: ' + data.toString());
     });
-    wg.on('exit', function (code:any) {
-        console.log('child process exited with code ' + code.toString());
-    });
+    //wg.on('exit', function (code:any) {
+    //    console.log('wg process exited with code ' + code.toString());
+    //});
 }
 
 const pingIp = async ( ip:string ): Promise<void> => {
@@ -526,11 +526,12 @@ const pingIp = async ( ip:string ): Promise<void> => {
     ping.stderr.on('data', function (data:any) {
         console.log('ERROR: ' + data.toString());
     });
+    
     ping.on('exit', function (code:any) {
         if(code == 0){
             console.log('Peer has been configure correctly')
         }else{
-            console.log('ERROR: child process exited with code ' + code.toString());
+            console.log('ERROR: delete peer process exited with code ' + code.toString());
         }
     });
 
