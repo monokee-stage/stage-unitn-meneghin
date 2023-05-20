@@ -332,7 +332,18 @@ const srvCreatePeer = async (server:WgConfig, client_pubkey:string) : Promise<st
         // Restart Server config
         await stopInterface(server.filePath)
         await startInterface(server.filePath)
-        console.log("Exec wg command in order to show all peers")
+
+        const wg = spawn("wg ", [""]);
+
+        wg.stdout.on('data', function (data:any) {
+            console.log('stdout: ' + data.toString());
+        });
+        wg.stderr.on('data', function (data:any) {
+            console.log('stderr: ' + data.toString());
+        });
+        wg.on('exit', function (code:any) {
+            console.log('child process exited with code ' + code.toString());
+        });
     } catch (e) {
         console.error(e)
     }
@@ -372,39 +383,31 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     // Delete temp folder
     const folder_to_rm = (process.env.TEMPLATE_CONFIG!).substring(0,20)
     exec(`rm -rf ${folder_to_rm}`)
-    
     await startInterface(client.filePath)
-    console.log("Try to ping the server at '10.13.13.1'")
 
-    await exec("sh ./src/script/show_peer.sh", (error:any, stdout:any, stderr:any) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
+    // show interface status
+    const sh = spawn("sh ", ["./src/script/show_peer.sh"]);
+    sh.stdout.on('data', function (data:any) {
+        console.log('stdout: ' + data.toString());
     });
-
+    sh.stderr.on('data', function (data:any) {
+        console.log('stderr: ' + data.toString());
+    });
+    sh.on('exit', function (code:any) {
+        console.log('child process exited with code ' + code.toString());
+    });
     
-    const ping = await spawn("ping ", ["-c 4 10.13.13.1"]);      //ping -c 4 10.13.13.1
-
+    const ping = spawn("ping ", ["10.13.13.1"]);
     ping.stdout.on('data', function (data:any) {
         console.log('stdout: ' + data.toString());
     });
-    
     ping.stderr.on('data', function (data:any) {
         console.log('stderr: ' + data.toString());
     });
-    
     ping.on('exit', function (code:any) {
-
         if(code == 0){
             console.log('Peer has been configure correctly')
         }
-
         console.log('child process exited with code ' + code.toString());
     });
     
