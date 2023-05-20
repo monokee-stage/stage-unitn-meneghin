@@ -423,6 +423,7 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
         });
         await deleteRoute(ip)
 
+        console.log(pubkey)
         server.removePeer(pubkey)
         await server.writeToFile()
         console.log("New peers list:")
