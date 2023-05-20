@@ -408,10 +408,26 @@ const deleteClient = async (pubkey : string): Promise<WgConfig> => {
     console.log("from the server ", server.wgInterface!.address![0])
     try{
         const host = await getHost(pubkey)
+        const ip = await getIp(pubkey)
+        
+        //wg set wg0 peer $pubkey remove
+        const add = await spawn("wg", ["set", "wg0", "peer", `"${pubkey}"`, "remove"], { stdio: [], shell: true });
+        add.stdout.on('data', function (data:any) {
+            console.log(data.toString());
+        });
+        add.stderr.on('data', function (data:any) {
+            console.log('ERROR: ' + data.toString());
+        });
+        add.on('exit', function (code:any) {
+            console.log('child process exited with code ' + code.toString());
+        });
+        await deleteRoute(ip)
+
         server.removePeer(pubkey)
         await server.writeToFile()
         console.log("New peers list:")
         console.log(server.peers)
+
     } catch (e) {
         console.error(e)
     }
@@ -473,6 +489,20 @@ const addRoute = async ( ip:string) : Promise<void> => {
     });
 }
 
+const deleteRoute = async ( ip:string) : Promise<void> => {
+    // Execution of: ip -4 route delete $ipc dev wg0
+    const addDevRoute = await spawn("ip", ["-4", "route", "delete", ip, "dev", "wg0"]);
+    addDevRoute.stdout.on('data', function (data:any) {
+        console.log(data.toString());
+    });
+    addDevRoute.stderr.on('data', function (data:any) {
+        console.log('ERROR: ' + data.toString());
+    });
+    addDevRoute.on('exit', function (code:any) {
+        console.log('child process exited with code ' + code.toString());
+    });
+}
+
 const wg = async(): Promise<void> => {
     // Esecution of: wg
     const wg = await spawn("wg");
@@ -506,6 +536,27 @@ const pingIp = async ( ip:string ): Promise<void> => {
     });
 
 }
+
+const getIp = async (pubkey : string): Promise<string> => {
+    const peer = (await getConfig()).peers
+    let ip : string = "empty"
+    try{
+        for(let i=0; i<peer!.length; i++){
+            let ip = peer![i].allowedIps![0]
+
+            if(pubkey === peer![i].publicKey){
+                console.log("ip: ", ip)
+            }else{
+                throw new Error(`Not able to find a match between the pubkey provided and the hosts created`)           // Fix new Error, show error even it works correctly
+            }
+        }
+    } catch (e) {
+        console.error(e)
+    }
+    return ip
+}
+
+
 
 const getHost = async (pubkey : string): Promise<string> => {
     const peer = (await getConfig()).peers
