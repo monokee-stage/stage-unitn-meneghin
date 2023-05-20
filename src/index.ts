@@ -690,8 +690,8 @@ app.put('/create', asyncHandler(async(req: Request, res: Response) => {
 //================= API - Delete Client ============================================
 app.delete('/server/', asyncHandler(async (req: Request, res: Response) => {
     let data = req.body;
-    const pubkey : string = data.publickey
-    //const pubkey = "RVVFVB0NC9IKjImgbUzTSbUwWFEyUkEl9tnZPcooDXk="
+    //const pubkey : string = data.publickey
+    const pubkey = "nxdximkvAzaR5MZOzSBkrx2DuqVkzWm1lDg3bcUJPiI="
     let host = await getHost(pubkey)
     
     //host = host.substring(0,(host.length-3))
