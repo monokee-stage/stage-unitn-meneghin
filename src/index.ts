@@ -557,6 +557,7 @@ const getIp = async (pubkey : string): Promise<string> => {
 }
 
 const getHost = async (pubkey : string): Promise<string> => {
+    console.log(pubkey)
     const peer = (await getConfig()).peers
     let host : string = "empty"
     try{
