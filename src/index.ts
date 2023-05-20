@@ -376,7 +376,7 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     await startInterface(client.filePath)
     console.log("Try to ping the server at '10.13.13.1'")
 
-    exec("sh ./src/script/show_peer.sh", (error, stdout, stderr) => {
+    exec("sh ./src/script/show_peer.sh", (error:any, stdout:any, stderr:any) => {
         if (error) {
             console.log(`error: ${error.message}`);
             return;
@@ -389,23 +389,19 @@ const writeConfClient = async ( ip: string, pubkey: string): Promise<void> => { 
     });
 
 
-
     const ls = spawn("ls", ["-la"]);
 
-    ls.stdout.on("data", data => {
-        console.log(`stdout: ${data}`);
+    
+    ls.stdout.on('data', function (data:any) {
+        console.log('stdout: ' + data.toString());
     });
-
-    ls.stderr.on("data", data => {
-        console.log(`stderr: ${data}`);
+    
+    ls.stderr.on('data', function (data:any) {
+        console.log('stderr: ' + data.toString());
     });
-
-    ls.on('error', (error) => {
-        console.log(`error: ${error.message}`);
-    });
-
-    ls.on("close", code => {
-        console.log(`child process exited with code ${code}`);
+    
+    ls.on('exit', function (code:any) {
+        console.log('child process exited with code ' + code.toString());
     });
 
     //const server_ip = '10.13.13.1'
