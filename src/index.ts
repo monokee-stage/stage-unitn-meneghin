@@ -603,13 +603,13 @@ app.get('/', (req: Request, res: Response) => {
 
 //==================================================================================
 //================= API - server config ============================================
-app.get('/config', asyncHandler(async (req: Request, res: Response) => {
+/*app.get('/config', asyncHandler(async (req: Request, res: Response) => {
     const srv_config = await getConfig()
     return res.send( srv_config )
-}));
+}));*/
 
 //==================================================================================
-//================= API - server config ============================================
+//================= API - server info ==============================================
 app.get('/info', asyncHandler(async (req: Request, res: Response) => {
     const srv_info = await getServerInfo()
     return res.send( srv_info )
@@ -617,11 +617,11 @@ app.get('/info', asyncHandler(async (req: Request, res: Response) => {
 
 //==================================================================================
 //================= API - server interface =========================================
-app.get('/interface', asyncHandler(async (req: Request, res: Response) => {  // Temporary bc returns private key
+/*app.get('/interface', asyncHandler(async (req: Request, res: Response) => {  // Temporary bc returns private key
     const srv_config = await getConfig()                                      // INPUT: null - OUTPUT: Server config file . interface
     const srv_interface_to_send = srv_config.wgInterface                            // obj contains wg interface settings
     return res.send( srv_interface_to_send )
-}));
+})); */
 
 //==================================================================================
 //================= API - server peers =============================================
@@ -641,7 +641,10 @@ app.get('/all_ip/', asyncHandler(async (req: Request, res: Response) => {
 //================= API - Free Ip ==================================================
 app.get('/free_ip', asyncHandler(async (req: Request, res: Response) => {
     const free_ip_to_send = getFreeIp(await getConfig())                      // String containing a free random IP in the server busy-ip list
-    return res.send( (await free_ip_to_send).toString() )
+    const data = {
+        ip: (await free_ip_to_send) //.toString()
+    }
+    return res.send( data.ip )
 }));
 
 app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
