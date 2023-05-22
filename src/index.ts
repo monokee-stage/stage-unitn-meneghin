@@ -644,7 +644,7 @@ app.get('/free_ip', asyncHandler(async (req: Request, res: Response) => {
     const data = {
         ip: (await free_ip_to_send) //.toString()
     }
-    return res.send( data.ip )
+    return res.send( data )
 }));
 
 app.get('/client/host', asyncHandler(async (req: Request, res: Response) => {
