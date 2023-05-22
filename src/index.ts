@@ -25,7 +25,7 @@ var jsonParser = bodyParser.json()
 
 const app: Express = express();
 const port = 3000;
-const num_max_ip = 10
+const num_max_ip = 255
 const defaultReqIP = '10.13.13.255/32'
 
 //==================================================================================
@@ -672,7 +672,7 @@ app.put('/request', asyncHandler(async(req: Request, res: Response) => {
     const pubkey = {
         publicKey : await clientRequest()
     }
-
+    console.log("Public Key: ", pubkey)
     return res.send (pubkey)
 }))
 
