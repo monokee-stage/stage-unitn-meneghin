@@ -1,0 +1,198 @@
+{
+	"info": {
+		"_postman_id": "c0bdbe33-273a-432e-a817-15178c986095",
+		"name": "Monokee wg server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20817176",
+		"_collection_link": "https://gold-meadow-794577.postman.co/workspace/Wg-server~92d64740-d912-4345-b3b8-531a44e0aaef/collection/20817176-c0bdbe33-273a-432e-a817-15178c986095?action=share&creator=20817176&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "GET server info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://stage-meneghin1.intranet.athesys.it:3000/info",
+					"protocol": "http",
+					"host": [
+						"stage-meneghin1",
+						"intranet",
+						"athesys",
+						"it"
+					],
+					"port": "3000",
+					"path": [
+						"info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET server peers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://stage-meneghin1.intranet.athesys.it:3000/peers",
+					"protocol": "http",
+					"host": [
+						"stage-meneghin1",
+						"intranet",
+						"athesys",
+						"it"
+					],
+					"port": "3000",
+					"path": [
+						"peers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET all busy iPs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://stage-meneghin1.intranet.athesys.it:3000/all_ip/",
+					"protocol": "http",
+					"host": [
+						"stage-meneghin1",
+						"intranet",
+						"athesys",
+						"it"
+					],
+					"port": "3000",
+					"path": [
+						"all_ip",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET free iP",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://stage-meneghin1.intranet.athesys.it:3000/free_ip",
+					"protocol": "http",
+					"host": [
+						"stage-meneghin1",
+						"intranet",
+						"athesys",
+						"it"
+					],
+					"port": "3000",
+					"path": [
+						"free_ip"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT client request",
+			"request": {
+				"method": "PUT",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "PUT peer on server",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"publickey\" : \"anUoohMX5FdGa8xJxv/1dAtLCH3+WLVI41vWohCZ/wU=\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://stage-meneghin1.intranet.athesys.it:3000/server/",
+					"protocol": "http",
+					"host": [
+						"stage-meneghin1",
+						"intranet",
+						"athesys",
+						"it"
+					],
+					"port": "3000",
+					"path": [
+						"server",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT client create",
+			"request": {
+				"method": "PUT",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE client-Peers from server",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\"m2GoGvmi55BxWCzkh5sDFtBiIF54052LYZWItg3vi08=\""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"publickey\" : \"e5zEi/9jKKy9/KCoPqZ1RVLm5qb3uIefPUpKoVU1vmB=\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://stage-meneghin1.intranet.athesys.it:3000/server/",
+					"protocol": "http",
+					"host": [
+						"stage-meneghin1",
+						"intranet",
+						"athesys",
+						"it"
+					],
+					"port": "3000",
+					"path": [
+						"server",
+						""
+					],
+					"query": [
+						{
+							"key": "pubkey",
+							"value": "tGyPijSGiOpg/bhTaWfBobsOna8K+rp9wn/m87XDwGE=",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
