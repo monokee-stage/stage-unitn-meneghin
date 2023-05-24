@@ -1,3 +1,5 @@
+Please refer to report.pdf
+
 ## Prerequisites
 I'm assuming you are cloning this repo into your $HOME
 - `cd ~`
@@ -46,15 +48,10 @@ ________________________________________________________________________________
 
 SERVER_URL="stage-meneghin1.intranet.athesys.it"\
 SERVER_IP="10.111.0.44"\
-SERVER_PUBKEY="RLGHcYlX5tkkkkkkkkkkkkkkkkkkkk1QYERHUz3c="\
-SERVER_PORT="41194"\
-SERVER_NETWORK="10.13.13.0/24"\
-SERVER_INTERFACE="10.13.13.1"\
-SERVER_CONFIG="/etc/wireguard/wg0.conf"\
-SERVER_SUBNETWORK="10.13.13."\
-SERVER_INTERFACE="10.13.13.1"\
-SERVER_FOLDER="/etc/wireguard/"\
-CLIENTS_FOLDER="/etc/wireguard/client-configs"
+CONFIG="/home/mattia/test/server.conf"\
+FOLDER="/home/mattia/test/"\
+TEMPLATE_CONFIG="/home/mattia/temp/"\
+CLIENTS_FOLDER="/home/mattia/test/client-configs"
 
 __________________________________________________________________________________________
 
@@ -62,7 +59,7 @@ In one of the first lines (after import) you can edit the number of IPs availabl
 > I'm assuming the usage of:
 - Subnet = 00000000
 - wildcard = 11111111 
-- 255 IPs available
+- 255 IPs available (Customize the number of IP in index.ts, row 28)
 __________________________________________________________________________________________
 ## Run the project
 In order to run the project you must run it from a terminal with sudo permissions
@@ -78,28 +75,35 @@ ________________________________________________________________________________
 ## Test the API
 I'm using Postman, `sudo snap install postman`
 
-1. #### Get the server wg.conf file
-  **GET** request at http://localhost:3000/server/
+1. #### Get the server info from wg0.conf file server configuration
+  **GET** request at http://localhost:3000/info
 
-2. #### Get the server interface from wg.conf file
-  **GET** request at http://localhost:3000/server/interface
+2. #### Get the server peers from wg0.conf file server configuration
+  **GET** request at http://localhost:3000/peers
 
-3. #### Get the server peers from wg.conf file
-  **GET** request at http://localhost:3000/server/peers
+3. #### Get all the busy ips in your wg0.conf file server configuration
+  **GET** request at http://localhost:3000/all_ip
 
-4. #### Get all the busy ips in your configuration
-  **GET** request at http://localhost:3000/server/all_ip/
+4. #### Get a unique free ip in your configuration subnet
+  **GET** request at http://localhost:3000/free_ip
 
-5. #### Get a unique free ip in your configuration subnet
-  **GET** request at http://localhost:3000/server/all_ip/free_ip
+5. #### Client request to peer
+  **PUT** request at http://localhost:3000/request
+  - Client generates key pair and store it in a temp file, returns public key
 
-6. #### Generate a client-server mash configuration that build wgx.conf binary file
-  **PUT** request at http://localhost:3000/client/create_file
+6. #### Create the peer with the public key received in the wg0.conf file server configuration
+  **PUT** request at http://localhost:3000/server
+  - Insert into the server the client public key and assign it a free Ip, add the route
 
-7. #### Delete client file and from server config
-  **DELETE** request at http://localhost:3000/client/
+7. #### Create the peer with the public key received in the wg0.conf file server configuration
+  **PUT** request at http://localhost:3000/create
+  - Generate the wg0.conf file with the IP provided by the server
+
+8. #### Delete client file and from server config
+  **DELETE** request at http://localhost:3000/server
+  - Delete the received public key form server, remove the route
 
 ## Attention ⚠️
 > In order to use the library the wg.conf file MUST be a binary file, so the "touch" mode won't work with the library read-file function
 
-You can find a template of this kind of binary conf file in this repo in the folder **./src/file_conf/**, called **client-1.conf**
+You can find a template of this kind of binary conf file in this repo in the folder **./src/file_conf/**, called **client-4.conf**
